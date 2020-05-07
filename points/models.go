@@ -28,26 +28,27 @@ type Scorer struct {
 	CircleID string
 }
 
+// UserScore is a mapping between a user and their score
+type UserScore struct {
+	UID   string
+	Score int
+}
+
 // CircleScore represents the total and individual scores for a circle
 type CircleScore struct {
 	CircleID   string
-	Total      int
-	userScores map[string]int
-}
-
-// Get returns the given user's score
-func (c CircleScore) Get(uid string) int {
-	return c.userScores[uid]
+	Score      int
+	UserScores []UserScore
 }
 
 func calculateCircleScore(circleID string, scores []Score) CircleScore {
-	userScores := make(map[string]int)
+	userScores := make([]UserScore, len(scores))
 	total := 0
 	for _, score := range scores {
-		userScores[score.UID] += score.Value
+		userScores = append(userScores, UserScore{UID: score.UID, Score: score.Value})
 		total += score.Value
 	}
-	return CircleScore{CircleID: circleID, userScores: userScores}
+	return CircleScore{CircleID: circleID, Score: total, UserScores: userScores}
 }
 
 func (s Scorer) getCircleScoreForDates(db *gorm.DB, startDate time.Time, endDate time.Time) CircleScore {
