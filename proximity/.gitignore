@@ -1,0 +1,11 @@
+# Random
+.DS_Store
+# Env
+*.env
+env.list
+# Binaries
+**/*.out
+# Secrets (credentials etc)
+secrets/
+# VSCode crap
+.vscode/

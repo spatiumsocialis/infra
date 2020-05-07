@@ -1,4 +1,4 @@
-module github.com/safe-distance/infra
+module github.com/safe-distance/socium-infra
 
 go 1.14
 

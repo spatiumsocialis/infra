@@ -1,0 +1,6 @@
+*.env
+*.list
+secrets/
+**/*.out
+# VSCode crap
+.vscode/
