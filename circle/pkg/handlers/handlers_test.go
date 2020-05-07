@@ -5,19 +5,26 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/safe-distance/auth"
-	"github.com/safe-distance/circle/pkg/common"
-	"github.com/safe-distance/circle/pkg/models"
+	"github.com/safe-distance/socium-infra/auth"
+	"github.com/safe-distance/socium-infra/circle/pkg/models"
+	"github.com/safe-distance/socium-infra/common"
 )
 
+var s *common.Service
+
 func TestMain(m *testing.M) {
-	common.InitializeService(true, "../test.env")
+	db, err := common.NewDB(&models.Circle{}, &auth.User{})
+	if err != nil {
+		log.Fatalf("Error initializing DB: %v\n", err.Error())
+	}
+	s = common.NewService("Circle", "/circle", db)
 	os.Exit(m.Run())
 }
 
@@ -39,7 +46,7 @@ func TestUserHandler(t *testing.T) {
 	ctx := auth.AddTokenTo(context.Background(), testToken)
 	w := httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
-	AddToCircle(w, r.WithContext(ctx))
+	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
 
 	if w.Code != http.StatusOK {
 		body, _ := ioutil.ReadAll(w.Result().Body)
@@ -77,7 +84,7 @@ func TestUserHandler(t *testing.T) {
 	w = httptest.NewRecorder()
 	ctx = auth.AddTokenTo(context.Background(), newTestToken)
 
-	AddToCircle(w, r.WithContext(ctx))
+	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder
 	resBuffer = bytes.NewBuffer([]byte{})
@@ -100,7 +107,7 @@ func TestUserHandler(t *testing.T) {
 	w = httptest.NewRecorder()
 	ctx = auth.AddTokenTo(r.Context(), testToken)
 	// Call the interaction handler with the response recorder and test request
-	GetCircle(w, r.WithContext(ctx))
+	GetCircle(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder
 	resBuffer = bytes.NewBuffer([]byte{})

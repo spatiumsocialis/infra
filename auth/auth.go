@@ -11,6 +11,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"github.com/jinzhu/gorm"
 )
 
 const googleApplicationCredentialsKey = "GOOGLE_APPLICATION_CREDENTIALS"
@@ -112,9 +113,9 @@ type User struct {
 }
 
 // GetUser retrieves the UID from a request's token and returns the user model
-func GetUser(r *http.Request) (User, error) {
+func GetUser(r *http.Request, db *gorm.DB) (User, error) {
 	// Retrieve the auth token from the request context
-	token, err := auth.GetTokenFrom(r.Context())
+	token, err := GetTokenFrom(r.Context())
 	if err != nil {
 		return User{}, err
 	}

@@ -1,12 +1,12 @@
-package circle
+package routes
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/safe-distance/circle/pkg/handlers"
 	"github.com/safe-distance/socium-infra/auth"
+	"github.com/safe-distance/socium-infra/circle/pkg/handlers"
 	"github.com/safe-distance/socium-infra/common"
 )
 
@@ -15,23 +15,23 @@ const ServicePrefix = "/api/v1/circle"
 
 // Route represents one route of the service
 type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
+	Name               string
+	Method             string
+	Pattern            string
+	ServiceHandlerFunc common.ServiceHandler
 }
 
 // NewRouter returns a router for this service
-func NewRouter() *mux.Router {
+func NewRouter(s *common.Service) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 		var handler http.Handler
-		handler = route.HandlerFunc
+		handler = route.ServiceHandlerFunc(s)
 		handler = auth.Middleware(handler)
 		handler = common.Logger(handler, route.Name)
 		router.
 			Methods(route.Method).
-			Path(ServicePrefix + route.Pattern).
+			Path(s.PathPrefix + route.Pattern).
 			Name(route.Name).
 			Handler(handler)
 	}

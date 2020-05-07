@@ -10,8 +10,9 @@ import (
 	"time"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/safe-distance/auth"
+
 	proximity "github.com/safe-distance/proximity/pkg"
+	"github.com/safe-distance/socium-infra/auth"
 )
 
 func TestMain(m *testing.M) {

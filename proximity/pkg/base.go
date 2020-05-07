@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // gorm driver
-	"github.com/safe-distance/auth"
 	"github.com/safe-distance/initialize"
+	"github.com/safe-distance/socium-infra/auth"
 )
 
 var db *gorm.DB

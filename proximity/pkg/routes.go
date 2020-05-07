@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/safe-distance/auth"
+	"github.com/safe-distance/socium-infra/auth"
 )
 
 // ServicePrefix is the URL prefix for the service
