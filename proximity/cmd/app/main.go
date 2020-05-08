@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	proximity "github.com/safe-distance/proximity/pkg"
+	proximity "github.com/safe-distance/socium-infra/proximity/pkg"
 )
 
 func main() {
