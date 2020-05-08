@@ -5,6 +5,8 @@ import (
 	"github.com/safe-distance/socium-infra/auth"
 )
 
+// General
+
 // ServiceName is the name of the service
 const ServiceName = "Scoring service"
 
@@ -15,3 +17,11 @@ const ServicePathPrefix = "/scores"
 var Middleware = []mux.MiddlewareFunc{
 	auth.Middleware,
 }
+
+//  Service-specific
+
+// PeriodParameterString is the key for the 'period' path parameter
+const PeriodParameterString = "period"
+
+// RollingWindowDays is the number of days in a rolling window period
+const RollingWindowDays = 14

@@ -20,7 +20,7 @@ import (
 var s *common.Service
 
 func TestMain(m *testing.M) {
-	s = common.NewService(config.ServiceName, config.ServicePathPrefix, config.Models...)
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema)
 	os.Exit(m.Run())
 }
 

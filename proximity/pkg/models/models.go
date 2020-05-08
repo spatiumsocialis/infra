@@ -4,7 +4,15 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"github.com/safe-distance/socium-infra/auth"
+	"github.com/safe-distance/socium-infra/common"
 )
+
+// Schema holds the list of models that the DB schema contains
+var Schema = common.Schema{
+	&Interaction{},
+	&auth.User{},
+}
 
 // Interaction represents a proximity interaction event between a user and another person
 type Interaction struct {

@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/safe-distance/socium-infra/circle/config"
-	"github.com/safe-distance/socium-infra/circle/pkg/routes"
 	"github.com/safe-distance/socium-infra/common"
-	"github.com/safe-distance/socium-infra/proximity/pkg/models"
+	"github.com/safe-distance/socium-infra/scoring/config"
+	"github.com/safe-distance/socium-infra/scoring/pkg/models"
+	"github.com/safe-distance/socium-infra/scoring/pkg/routes"
 )
 
 func main() {
