@@ -1,4 +1,7 @@
-FROM golang:1.14 AS dep
+FROM alpine:edge AS dep
+RUN apk update
+RUN apk upgrade
+RUN apk add --update go gcc g++ openssh git
 # Add the module files and download dependencies.
 COPY ./go.mod /go/src/app/go.mod
 COPY ./go.sum /go/src/app/go.sum

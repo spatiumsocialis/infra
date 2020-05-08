@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite" // gorm driver
 )
 
 // NewDB connects to the database and migrates it with the argument models.
