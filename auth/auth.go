@@ -71,6 +71,7 @@ func Middleware(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			err := errors.New("Missing auth token")
+			log.Printf("Error verifying token: %v\n", err.Error())
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -78,6 +79,7 @@ func Middleware(next http.Handler) http.Handler {
 		splitAuthHeader := strings.Split(authHeader, " ")
 		if len(splitAuthHeader) != 2 {
 			err := errors.New("Invalid/malformed auth token")
+			log.Printf("Error verifying token: %v\n", err.Error())
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
@@ -93,7 +95,8 @@ func Middleware(next http.Handler) http.Handler {
 		// Verify the auth token
 		token, err := client.VerifyIDTokenAndCheckRevoked(ctx, authToken)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			log.Printf("Error verifying token: %v\n", err.Error())
+			http.Error(w, "Error: Invalid auth token", http.StatusUnauthorized)
 			return
 		}
 
