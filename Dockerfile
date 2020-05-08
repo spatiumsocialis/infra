@@ -29,7 +29,7 @@ RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 RUN go get -v ./...
 
 # Build the application.
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /go/bin/${EXECUTABLE} -tags netgo -a -v /go/src/app/${SERVICE}/cmd/${EXECUTABLE}
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /go/bin/${EXECUTABLE} /go/src/app/${SERVICE}/cmd/${EXECUTABLE}
 
 ENTRYPOINT /go/bin/${EXECUTABLE}
 
