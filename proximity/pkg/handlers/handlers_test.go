@@ -13,13 +13,14 @@ import (
 
 	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/common"
+	"github.com/safe-distance/socium-infra/proximity/config"
 	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 )
 
 var s *common.Service
 
 func TestMain(m *testing.M) {
-	s = common.NewService("Proximity", "/circle", &models.Interaction{}, &auth.User{})
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, config.Models...)
 	os.Exit(m.Run())
 
 }

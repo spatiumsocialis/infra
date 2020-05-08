@@ -6,16 +6,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/common"
 	"github.com/safe-distance/socium-infra/proximity/config"
-	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 	"github.com/safe-distance/socium-infra/proximity/pkg/routes"
 )
 
 func main() {
 	common.LoadEnv(false)
-	s := common.NewService(config.ServiceName, config.ServicePathPrefix, &models.Interaction{}, &auth.User{})
+	s := common.NewService(config.ServiceName, config.ServicePathPrefix, config.Models...)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("Error: PORT env variable not set")

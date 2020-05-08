@@ -12,7 +12,6 @@ import (
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/safe-distance/socium-infra/auth"
-	"github.com/safe-distance/socium-infra/circle/config"
 	"github.com/safe-distance/socium-infra/circle/pkg/models"
 	"github.com/safe-distance/socium-infra/common"
 )
@@ -20,7 +19,7 @@ import (
 var s *common.Service
 
 func TestMain(m *testing.M) {
-	s = common.NewService(config.ServiceName, config.ServicePathPrefix, config.Models...)
+	s = common.NewService("Circle", "/circle", &models.Circle{}, &auth.User{})
 	os.Exit(m.Run())
 }
 
