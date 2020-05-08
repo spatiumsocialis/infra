@@ -1,4 +1,4 @@
-package proximity
+package models
 
 import (
 	"time"

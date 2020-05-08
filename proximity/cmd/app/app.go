@@ -7,15 +7,15 @@ import (
 	"os"
 
 	"github.com/safe-distance/socium-infra/auth"
-	"github.com/safe-distance/socium-infra/circle/config"
-	"github.com/safe-distance/socium-infra/circle/pkg/models"
-	"github.com/safe-distance/socium-infra/circle/pkg/routes"
 	"github.com/safe-distance/socium-infra/common"
+	"github.com/safe-distance/socium-infra/proximity/config"
+	"github.com/safe-distance/socium-infra/proximity/pkg/models"
+	"github.com/safe-distance/socium-infra/proximity/pkg/routes"
 )
 
 func main() {
 	common.LoadEnv(false)
-	s := common.NewService(config.ServiceName, config.ServicePathPrefix, &models.Circle{}, &auth.User{})
+	s := common.NewService(config.ServiceName, config.ServicePathPrefix, &models.Interaction{}, &auth.User{})
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("Error: PORT env variable not set")

@@ -1,62 +1,31 @@
 package routes
 
 import (
-	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
-	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/circle/pkg/handlers"
 	"github.com/safe-distance/socium-infra/common"
 )
 
-// ServicePrefix  is the URL path prefix for the service
-const ServicePrefix = "/api/v1/circle"
-
-// Route represents one route of the service
-type Route struct {
-	Name               string
-	Method             string
-	Pattern            string
-	ServiceHandlerFunc common.ServiceHandler
-}
-
-// NewRouter returns a router for this service
-func NewRouter(s *common.Service) *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
-		var handler http.Handler
-		handler = route.ServiceHandlerFunc(s)
-		handler = auth.Middleware(handler)
-		handler = common.Logger(handler, route.Name)
-		router.
-			Methods(route.Method).
-			Path(s.PathPrefix + route.Pattern).
-			Name(route.Name).
-			Handler(handler)
-	}
-
-	return router
-}
-
-var routes = []Route{
+// Routes holds the service's HTTP routes
+var Routes = common.Routes{
 	{
-		"AddToCircle",
-		strings.ToUpper("Patch"),
-		"/add",
-		handlers.AddToCircle,
+		Name:           "AddToCircle",
+		Method:         strings.ToUpper("Patch"),
+		Pattern:        "/add",
+		ServiceHandler: handlers.AddToCircle,
 	},
 
 	{
-		"GetCircle",
-		strings.ToUpper("Get"),
-		"/",
-		handlers.GetCircle,
+		Name:           "GetCircle",
+		Method:         strings.ToUpper("Get"),
+		Pattern:        "/",
+		ServiceHandler: handlers.GetCircle,
 	},
 	{
-		"RemoveFromCircle",
-		strings.ToUpper("Patch"),
-		"/remove",
-		handlers.RemoveFromCircle,
+		Name:           "RemoveFromCircle",
+		Method:         strings.ToUpper("Patch"),
+		Pattern:        "/remove",
+		ServiceHandler: handlers.RemoveFromCircle,
 	},
 }

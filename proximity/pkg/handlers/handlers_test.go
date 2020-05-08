@@ -1,4 +1,4 @@
-package proximity
+package handlers
 
 import (
 	"bytes"
@@ -11,12 +11,15 @@ import (
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
-	proximity "github.com/safe-distance/proximity/pkg"
 	"github.com/safe-distance/socium-infra/auth"
+	"github.com/safe-distance/socium-infra/common"
+	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 )
 
+var s *common.Service
+
 func TestMain(m *testing.M) {
-	proximity.InitializeService(true, "../test.env")
+	s = common.NewService("Proximity", "/circle", &models.Interaction{}, &auth.User{})
 	os.Exit(m.Run())
 
 }
@@ -25,7 +28,7 @@ func TestMain(m *testing.M) {
 // to create a new Interaction, followed by a GET request to retrieve it, and ensuring  the two results are the same.
 func TestInteractionHandler(t *testing.T) {
 	// Create a test interaction and a test token
-	testInteraction := proximity.Interaction{Distance: 51, Duration: time.Duration(60e9), Timestamp: time.Now()}
+	testInteraction := models.Interaction{Distance: 51, Duration: time.Duration(60e9), Timestamp: time.Now()}
 	testUID := "TEST_UID"
 	testToken := &auth.Token{UID: testUID}
 	// Marshal the text interaction to JSON, as it would be received in a POST request
@@ -39,7 +42,7 @@ func TestInteractionHandler(t *testing.T) {
 	ctx := auth.AddTokenTo(context.Background(), testToken)
 	w := httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
-	proximity.AddInteraction(w, r.WithContext(ctx))
+	AddInteraction(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder
 	resBuffer := bytes.NewBuffer([]byte{})
@@ -49,7 +52,7 @@ func TestInteractionHandler(t *testing.T) {
 	}
 
 	// Unmarshal the returned interaction
-	var createInteraction proximity.Interaction
+	var createInteraction models.Interaction
 	err = json.Unmarshal(resBuffer.Bytes(), &createInteraction)
 	if err != nil {
 		t.Fatalf("Error unmarshalling response body into Interaction")
@@ -61,7 +64,7 @@ func TestInteractionHandler(t *testing.T) {
 	r = httptest.NewRequest("GET", "/interactions", nil)
 	w = httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
-	proximity.GetInteractions(w, r.WithContext(ctx))
+	GetInteractions(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder
 	resBuffer = bytes.NewBuffer([]byte{})
@@ -71,7 +74,7 @@ func TestInteractionHandler(t *testing.T) {
 	}
 
 	// Unmarshal the returned interaction
-	var getInteractions []proximity.Interaction
+	var getInteractions []models.Interaction
 	err = json.Unmarshal(resBuffer.Bytes(), &getInteractions)
 	if err != nil {
 		t.Fatalf("Error unmarshalling response body into Interaction")

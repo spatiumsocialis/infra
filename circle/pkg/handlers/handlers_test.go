@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,11 +19,7 @@ import (
 var s *common.Service
 
 func TestMain(m *testing.M) {
-	db, err := common.NewDB(&models.Circle{}, &auth.User{})
-	if err != nil {
-		log.Fatalf("Error initializing DB: %v\n", err.Error())
-	}
-	s = common.NewService("Circle", "/circle", db)
+	s = common.NewService("Circle", "/circle", &models.Circle{}, &auth.User{})
 	os.Exit(m.Run())
 }
 

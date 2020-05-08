@@ -6,10 +6,10 @@ import (
 )
 
 // ServiceName is the name of the service
-const ServiceName = "Circle service"
+const ServiceName = "Proximity service"
 
 // ServicePathPrefix is the path prefix which this service's endpoints will have
-const ServicePathPrefix = "/circle"
+const ServicePathPrefix = "/proximity"
 
 // Middleware holds the list of middlewares to be employed by this service
 var Middleware = []mux.MiddlewareFunc{

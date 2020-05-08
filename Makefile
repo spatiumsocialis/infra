@@ -6,19 +6,19 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BUILD_DIR=cmd/app
 BINARY_NAME=app.out
-SRC_NAME=main.go
+SRC_NAME=app.go
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: deps test build
 build: 
-	$(GOBUILD) -o ./$(BUILD_DIR)/${BINARY_NAME} -v ./$(BUILD_DIR)/${SRC_NAME}
+	$(GOBUILD) -o ./$(PACKAGE)$(BUILD_DIR)/${BINARY_NAME} -v ./$(PACKAGE)/$(BUILD_DIR)/${SRC_NAME}
 test: 
-	$(GOTEST) -v ./...
+	$(GOTEST) -v ./$(PACKAGE)...
 .PHONY: test
 clean: 
 	$(GOCLEAN)
-	rm -f ./$(BUILD_DIR)/${BINARY_NAME}
+	rm -f ./$(PACKAGE)$(BUILD_DIR)/${BINARY_NAME}
 run: build
-	./$(BUILD_DIR)/$(BINARY_NAME)
+	./$(PACKAGE)$(BUILD_DIR)/$(BINARY_NAME)
 deps:
 	$(GOGET) mod download

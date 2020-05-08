@@ -1,6 +1,7 @@
 package common
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -14,7 +15,11 @@ type Service struct {
 }
 
 // NewService returns a new service constructed with the given arguments
-func NewService(name string, pathPrefix string, db *gorm.DB) *Service {
+func NewService(name string, pathPrefix string, models ...interface{}) *Service {
+	db, err := NewDB(models...)
+	if err != nil {
+		log.Fatalf("Error initializing DB: %v\n", err.Error())
+	}
 	return &Service{Name: name, PathPrefix: pathPrefix, DB: db}
 }
 
