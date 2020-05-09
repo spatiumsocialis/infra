@@ -4,22 +4,33 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BUILD_DIR=cmd/app
+BUILD_DIR_APP=cmd/app
+BUILD_DIR_CONSUMER=cmd/consumer
 SERVICES=circle proximity scoring
-BINARY_NAME=app.out
-SRC_NAME=app.go
+EXECUTABLES=app consumer
+BINARY_NAME_APP=app.out
+BINARY_NAME_CONSUMER=consumer.out
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: deps test build
-build-circle:
-	$(GOBUILD) -o ./circle/$(BUILD_DIR)/${BINARY_NAME} -v ./circle/$(BUILD_DIR)/${SRC_NAME}
-build-proximity:
-	$(GOBUILD) -o ./proximity/$(BUILD_DIR)/${BINARY_NAME} -v ./proximity/$(BUILD_DIR)/${SRC_NAME}
-build-scoring:
-	$(GOBUILD) -o ./scoring/$(BUILD_DIR)/${BINARY_NAME} -v ./scoring/$(BUILD_DIR)/${SRC_NAME}
-build: build-circle build-proximity build-scoring
+# TODO: Clean this mess up
+build-circle-app:
+	$(GOBUILD) -o ./circle/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./circle/$(BUILD_DIR_APP)
+build-proximity-app:
+	$(GOBUILD) -o ./proximity/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./proximity/$(BUILD_DIR_APP)
+build-scoring-app:
+	$(GOBUILD) -o ./scoring/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./scoring/$(BUILD_DIR_APP)
+build-apps: build-circle-app build-proximity-app build-scoring-app
+build-circle-consumer:
+	$(GOBUILD) -o ./circle/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./circle/$(BUILD_DIR_CONSUMER)
+build-proximity-consumer:
+	$(GOBUILD) -o ./proximity/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./proximity/$(BUILD_DIR_CONSUMER)
+build-scoring-consumer:
+	$(GOBUILD) -o ./scoring/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./scoring/$(BUILD_DIR_CONSUMER)
+build-consumers: build-circle-consumer build-proximity-consumer build-scoring-consumer
+build: build-apps build-consumers
 test: 
-	$(GOTEST) ./$(PACKAGE)...
+	$(GOTEST) -v ./$(PACKAGE)... $(ARGS)
 .PHONY: test
 clean-circle:
 	$(GOCLEAN)

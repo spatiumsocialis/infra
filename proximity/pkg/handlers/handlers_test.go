@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Shopify/sarama"
+	"github.com/Shopify/sarama/mocks"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
 	"github.com/safe-distance/socium-infra/auth"
@@ -19,8 +21,12 @@ import (
 
 var s *common.Service
 
+var saramaConfig *sarama.Config
+
 func TestMain(m *testing.M) {
-	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema)
+	saramaConfig = sarama.NewConfig()
+	saramaConfig.Producer.Return.Successes = true
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, nil, config.ProductionTopic)
 	os.Exit(m.Run())
 
 }
@@ -28,6 +34,16 @@ func TestMain(m *testing.M) {
 // TestInteractionHandler tests the interaction handler by sending a POST request to interactionHandler
 // to create a new Interaction, followed by a GET request to retrieve it, and ensuring  the two results are the same.
 func TestInteractionHandler(t *testing.T) {
+	// Assign mock producer to service
+	mp := mocks.NewAsyncProducer(t, saramaConfig)
+
+	go func() {
+		for success := range mp.Successes() {
+			t.Logf("producer success: %+v\n", success.Value)
+		}
+	}()
+
+	s.Producer = mp
 	// Create a test interaction and a test token
 	testInteraction := models.Interaction{Distance: 51, Duration: time.Duration(60e9), Timestamp: time.Now()}
 	testUID := "TEST_UID"
@@ -43,6 +59,7 @@ func TestInteractionHandler(t *testing.T) {
 	ctx := auth.AddTokenTo(context.Background(), testToken)
 	w := httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
+	mp.ExpectInputAndSucceed()
 	AddInteraction(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder
@@ -65,6 +82,7 @@ func TestInteractionHandler(t *testing.T) {
 	r = httptest.NewRequest("GET", "/interactions", nil)
 	w = httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
+	mp.ExpectInputAndSucceed()
 	GetInteractions(s).ServeHTTP(w, r.WithContext(ctx))
 
 	//  Read the body of the response recorder

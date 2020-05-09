@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/firestore v1.2.0 // indirect
 	cloud.google.com/go/storage v1.7.0 // indirect
 	firebase.google.com/go v3.12.1+incompatible
+	github.com/Shopify/sarama v1.26.3
 	github.com/golang/protobuf v1.4.1 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/jinzhu/gorm v1.9.12

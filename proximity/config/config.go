@@ -15,3 +15,6 @@ const ServicePathPrefix = "/proximity"
 var Middleware = []mux.MiddlewareFunc{
 	auth.Middleware,
 }
+
+// ProductionTopic is the Kafka topic this service produces to
+const ProductionTopic = "new_interaction"
