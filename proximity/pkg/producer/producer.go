@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/Shopify/sarama"
+	"github.com/safe-distance/socium-infra/common"
 	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"time"
@@ -52,33 +52,10 @@ func createTLSConfiguration() (t *tls.Config) {
 	return t
 }
 
-type interactionLogEntry struct {
-	Interaction models.Interaction
-
-	encoded []byte
-	err     error
-}
-
-func (ile *interactionLogEntry) ensureEncoded() {
-	if ile.encoded == nil && ile.err == nil {
-		ile.encoded, ile.err = json.Marshal(ile)
-	}
-}
-
-func (ile *interactionLogEntry) Length() int {
-	ile.ensureEncoded()
-	return len(ile.encoded)
-}
-
-func (ile *interactionLogEntry) Encode() ([]byte, error) {
-	ile.ensureEncoded()
-	return ile.encoded, ile.err
-}
-
 // LogInteraction sends an interaction to the appropriate kafka topic
 func LogInteraction(p sarama.AsyncProducer, i *models.Interaction, topic string) {
-	entry := &interactionLogEntry{
-		Interaction: *i,
+	entry := &common.ObjectLogEntry{
+		Object: *i,
 	}
 	p.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
