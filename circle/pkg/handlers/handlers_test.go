@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Shopify/sarama"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/circle/config"
@@ -19,8 +20,12 @@ import (
 
 var s *common.Service
 
+var saramaConfig *sarama.Config
+
 func TestMain(m *testing.M) {
-	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema)
+	saramaConfig = sarama.NewConfig()
+	saramaConfig.Producer.Return.Successes = true
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, nil, config.ProductionTopic)
 	os.Exit(m.Run())
 }
 
