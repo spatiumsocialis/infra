@@ -43,6 +43,6 @@ clean-scoring:
 	rm -f ./scoring/$(BUILD_DIR)/${BINARY_NAME}
 clean: clean-circle clean-proximity clean-scoring
 run: build
-	./$(PACKAGE)$(BUILD_DIR)/$(BINARY_NAME) $(ARGS)
+	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 deps:
 	$(GOGET) mod download

@@ -32,6 +32,6 @@ func handleInteractionMessage(s *common.Service, m *sarama.ConsumerMessage) erro
 func main() {
 	common.RegisterConsumerFlags()
 	common.ParseFlags()
-	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, samara., config.ProductionTopic)
+	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, , config.ProductionTopic)
 	common.NewConsumer(handleInteractionMessage)
 }
