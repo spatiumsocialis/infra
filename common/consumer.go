@@ -60,7 +60,7 @@ func ParseFlags() {
 }
 
 // NewConsumer starts a new consumer with the given message handler
-func NewConsumer(handler MessageHandler) {
+func NewConsumer(s *Service, handler MessageHandler) {
 	log.Println("Starting a new Sarama consumer")
 
 	if verbose {
@@ -100,6 +100,7 @@ func NewConsumer(handler MessageHandler) {
 	consumer := Consumer{
 		ready:   make(chan bool),
 		handler: handler,
+		service: s,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -146,12 +147,13 @@ func NewConsumer(handler MessageHandler) {
 }
 
 // MessageHandler processes a received message
-type MessageHandler func(m *sarama.ConsumerMessage) error
+type MessageHandler func(s *Service, m *sarama.ConsumerMessage) error
 
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
 	ready   chan bool
 	handler MessageHandler
+	service *Service
 }
 
 // Handle passes the message to the consumer's messageHandler
@@ -159,7 +161,7 @@ func (consumer *Consumer) Handle(m *sarama.ConsumerMessage) error {
 	if m == nil {
 		return errors.New("message passed is nilpointer")
 	}
-	return consumer.handler(m)
+	return consumer.handler(consumer.service, m)
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim

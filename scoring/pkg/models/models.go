@@ -21,16 +21,31 @@ type EventType uint
 const (
 	// ProximityInteraction is the type for proximity interaction events
 	ProximityInteraction EventType = iota
+	// DailyAllowance is the points users get once a day
+	DailyAllowance
 )
 
 // EventScore represents the scoring of an event
 type EventScore struct {
 	gorm.Model
 	UID       string
-	EventType EventType
 	EventID   uint
+	EventType EventType
 	Timestamp time.Time
-	Value     int
+	Score     int
+}
+
+// CreateEventScore creates a new EventScore object and writes it to the database before returning it
+func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType, timestamp time.Time, score int) *EventScore {
+	es := EventScore{
+		UID:       uid,
+		EventID:   eventID,
+		EventType: eventType,
+		Timestamp: timestamp,
+		Score:     score,
+	}
+	db.Create(&es)
+	return &es
 }
 
 // UserScore is a mapping between a user and their score
@@ -49,9 +64,9 @@ type CircleScore struct {
 func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
 	userScores := make([]UserScore, len(scores))
 	total := 0
-	for _, score := range scores {
-		userScores = append(userScores, UserScore{UID: score.UID, Score: score.Value})
-		total += score.Value
+	for _, s := range scores {
+		userScores = append(userScores, UserScore{UID: s.UID, Score: s.Score})
+		total += s.Score
 	}
 	return CircleScore{CircleID: user.CircleID, Score: total, UserScores: userScores}
 }

@@ -22,10 +22,13 @@ type Service struct {
 type Schema []interface{}
 
 // NewService returns a new service constructed with the given arguments
-func NewService(name string, pathPrefix string, schema Schema, producer sarama.AsyncProducer, productionTopic string) *Service {
+func NewService(name string, pathPrefix string, schema Schema, producer *sarama.AsyncProducer, productionTopic string) *Service {
 	db, err := NewDB(schema...)
 	if err != nil {
 		log.Fatalf("Error initializing DB: %v\n", err.Error())
+	}
+	if producer == nil {
+
 	}
 	return &Service{Name: name, PathPrefix: pathPrefix, DB: db, Producer: producer, ProductionTopic: productionTopic}
 }

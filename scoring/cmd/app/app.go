@@ -43,7 +43,7 @@ func main() {
 
 	producer := producer.NewInteractionLogProducer(brokerList)
 	common.LoadEnv(false)
-	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, &producer, config.ProductionTopic)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("Error: PORT env variable not set")

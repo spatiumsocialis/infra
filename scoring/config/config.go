@@ -28,3 +28,9 @@ const RollingWindowDays = 14
 
 // ProductionTopic is the Kafka topic this service produces to
 const ProductionTopic = "new_interaction_score"
+
+// Scores for events
+const (
+	ProximityInteractionPoints = -100
+	DailyAllowancePoints       = 1000
+)

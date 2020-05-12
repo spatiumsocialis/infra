@@ -25,4 +25,6 @@ type Interaction struct {
 	Duration time.Duration
 	// Timestamp of the beginning of the interaction
 	Timestamp time.Time
+	// Score for the interaction
+	Score float32
 }
