@@ -36,7 +36,7 @@ type EventScore struct {
 }
 
 // CreateEventScore creates a new EventScore object and writes it to the database before returning it
-func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType, timestamp time.Time, score int) *EventScore {
+func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType, timestamp time.Time, score int) (*EventScore, error) {
 	es := EventScore{
 		UID:       uid,
 		EventID:   eventID,
@@ -44,8 +44,10 @@ func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType
 		Timestamp: timestamp,
 		Score:     score,
 	}
-	db.Create(&es)
-	return &es
+	if err := db.Create(&es).Error; err != nil {
+		return &es, err
+	}
+	return &es, nil
 }
 
 // UserScore is a mapping between a user and their score

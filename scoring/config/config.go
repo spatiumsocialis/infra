@@ -34,3 +34,6 @@ const (
 	ProximityInteractionPoints = -100
 	DailyAllowancePoints       = 1000
 )
+
+// AllUserID is the userID to use for event scores which apply to all users
+const AllUserID = "ALL"

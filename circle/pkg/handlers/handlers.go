@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/safe-distance/socium-infra/auth"
+	"github.com/safe-distance/socium-infra/circle/config"
 	"github.com/safe-distance/socium-infra/circle/pkg/models"
 	"github.com/safe-distance/socium-infra/common"
 )
@@ -51,6 +52,10 @@ func AddToCircle(s *common.Service) http.Handler {
 		if err != nil {
 			log.Fatalf("Error marshalling circle: %v", err.Error())
 		}
+
+		// Log updated user
+		common.LogObject(s.Producer, user.ID, user, config.ProductionTopic)
+
 		// Write the user back to the response
 		w.Write(payload)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")

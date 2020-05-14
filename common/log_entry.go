@@ -29,3 +29,10 @@ func (o *ObjectLogEntry) Encode() ([]byte, error) {
 	o.ensureEncoded()
 	return o.encoded, o.err
 }
+
+// NewObjectLogEntry returns a new ObjectLogEntry
+func NewObjectLogEntry(object interface{}) ObjectLogEntry {
+	return ObjectLogEntry{
+		Object: object,
+	}
+}

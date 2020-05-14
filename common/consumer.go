@@ -32,12 +32,24 @@ var (
 	verbose = false
 )
 
-// RegisterFlags registers the consumer flags
+type (
+	// MessageHandler processes a received message
+	MessageHandler func(s *Service, m *sarama.ConsumerMessage) error
+
+	// Consumer represents a Sarama consumer group consumer
+	Consumer struct {
+		ready           chan bool
+		topicHandlerMap map[string]MessageHandler
+		service         *Service
+	}
+)
+
+// RegisterConsumerFlags registers the consumer flags
 func RegisterConsumerFlags() {
 	flag.StringVar(&brokers, "brokers", "", "Kafka bootstrap brokers to connect to, as a comma separated list")
 	flag.StringVar(&group, "group", "", "Kafka consumer group definition")
 	flag.StringVar(&version, "version", "2.5.0", "Kafka cluster version")
-	flag.StringVar(&topics, "topics", "", "Kafka topics to be consumed, as a comma separated list")
+	// flag.StringVar(&topics, "topics", "", "Kafka topics to be consumed, as a comma separated list")
 	flag.StringVar(&assignor, "assignor", "range", "Consumer group partition assignment strategy (range, roundrobin, sticky)")
 	flag.BoolVar(&oldest, "oldest", true, "Kafka consumer consume initial offset from oldest")
 	flag.BoolVar(&verbose, "verbose", false, "Sarama logging")
@@ -50,9 +62,9 @@ func ParseFlags() {
 		panic("no Kafka bootstrap brokers defined, please set the -brokers flag")
 	}
 
-	if len(topics) == 0 {
-		panic("no topics given to be consumed, please set the -topics flag")
-	}
+	// if len(topics) == 0 {
+	// 	panic("no topics given to be consumed, please set the -topics flag")
+	// }
 
 	if len(group) == 0 {
 		panic("no Kafka consumer group defined, please set the -group flag")
@@ -60,7 +72,7 @@ func ParseFlags() {
 }
 
 // NewConsumer starts a new consumer with the given message handler
-func NewConsumer(s *Service, handler MessageHandler) {
+func NewConsumer(s *Service, topicHandlerMap map[string]MessageHandler) {
 	log.Println("Starting a new Sarama consumer")
 
 	if verbose {
@@ -98,9 +110,9 @@ func NewConsumer(s *Service, handler MessageHandler) {
 	 * Setup a new Sarama consumer group
 	 */
 	consumer := Consumer{
-		ready:   make(chan bool),
-		handler: handler,
-		service: s,
+		ready:           make(chan bool),
+		topicHandlerMap: topicHandlerMap,
+		service:         s,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -111,13 +123,17 @@ func NewConsumer(s *Service, handler MessageHandler) {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
+	topics := make([]string, len(topicHandlerMap))
+	for topic := range topicHandlerMap {
+		topics = append(topics, topic)
+	}
 	go func() {
 		defer wg.Done()
 		for {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-			if err := client.Consume(ctx, strings.Split(topics, ","), &consumer); err != nil {
+			if err := client.Consume(ctx, topics, &consumer); err != nil {
 				log.Panicf("Error from consumer: %v", err)
 			}
 			// check if context was cancelled, signaling that the consumer should stop
@@ -146,22 +162,13 @@ func NewConsumer(s *Service, handler MessageHandler) {
 	}
 }
 
-// MessageHandler processes a received message
-type MessageHandler func(s *Service, m *sarama.ConsumerMessage) error
-
-// Consumer represents a Sarama consumer group consumer
-type Consumer struct {
-	ready   chan bool
-	handler MessageHandler
-	service *Service
-}
-
 // Handle passes the message to the consumer's messageHandler
 func (consumer *Consumer) Handle(m *sarama.ConsumerMessage) error {
 	if m == nil {
 		return errors.New("message passed is nilpointer")
 	}
-	return consumer.handler(consumer.service, m)
+	handler := consumer.topicHandlerMap[m.Topic]
+	return handler(consumer.service, m)
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim

@@ -1,5 +1,18 @@
 version: '3.4'
 services:
+  # reverse-proxy:
+  #   # The official v2 Traefik docker image
+  #   image: traefik:v2.2
+  #   # Enables the web UI and tells Traefik to listen to docker
+  #   command: --api.insecure=true --providers.docker
+  #   ports:
+  #     # The HTTP port
+  #     - "80:80"
+  #     # The Web UI (enabled by --api.insecure=true)
+  #     - "8080:8080"
+  #   volumes:
+  #     # So that Traefik can listen to the Docker events
+  #     - /var/run/docker.sock:/var/run/docker.sock
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -21,3 +34,35 @@ services:
       - zookeeper
     extra_hosts:
       - "dockerhost:$DOCKERHOST"
+  circle-app:
+    build: 
+      context: .
+      args: 
+        SERVICE: circle
+        EXECUTABLE: app
+    environment: 
+      BROKERS: localhost:9092
+  proximity-app:
+    build: 
+      context: .
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: app
+    environment: 
+      BROKERS: localhost:9092
+  scoring-app:
+    build:
+      context: .
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: app
+    environment: 
+      BROKERS: localhost:9092
+  scoring-consumer:
+    build: 
+      context: .
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: consumer
+    environment: 
+      BROKERS: localhost:9092
