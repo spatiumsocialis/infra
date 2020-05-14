@@ -26,7 +26,7 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 # Download and install imports
-RUN go get -v ./...
+RUN go get -v  -insecure ./...
 
 # Build the application.
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /go/bin/${EXECUTABLE} /go/src/app/${SERVICE}/cmd/${EXECUTABLE}
