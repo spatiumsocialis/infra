@@ -14,6 +14,7 @@ PORT=8080
 GOOGLE_API_KEY="your google api key"
 GOOGLE_APPLICATION_CREDENTIALS=path/to/google/service/account.json
 ```
-4. From the project root, run `docker build -t dependencies -f ./dependencies.Dockerfile .` to build the dependencies image
-5. Run `docker-compose run --rm start_dependencies` to start the Kafka and Zookeeper services
-6. Run `docker-compose up` to build and run the rest of the services
+4. From the project root, run `chmod +x *.sh` to enable execution on the scripts
+4. Run `./build.sh` to build the services
+5. Run `./start.sh` to start the services
+6. Run `./stop.sh` to stop the services
