@@ -1,9 +1,11 @@
 package routes
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/safe-distance/socium-infra/common"
+	"github.com/safe-distance/socium-infra/scoring/config"
 	"github.com/safe-distance/socium-infra/scoring/pkg/handlers"
 )
 
@@ -12,7 +14,7 @@ var Routes = common.Routes{
 	{
 		Name:           "GetCircleScoreForPeriod",
 		Method:         strings.ToUpper("Get"),
-		Pattern:        "/scores/{period}",
+		Pattern:        fmt.Sprintf("/{%v}", config.PeriodParameterString),
 		ServiceHandler: handlers.GetCircleScoreForPeriod,
 	},
 }

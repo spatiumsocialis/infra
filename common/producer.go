@@ -2,6 +2,9 @@ package common
 
 import (
 	"flag"
+	"fmt"
+	"os"
+	"strings"
 
 	"github.com/Shopify/sarama"
 
@@ -12,28 +15,19 @@ import (
 	"time"
 )
 
-// // Sarama producer flags
-var (
-	// 	addr      = flag.String("addr", ":8080", "The address to bind to")
-	// 	brokers   = flag.String("brokers", os.Getenv("KAFKA_PEERS"), "The Kafka brokers to connect to, as a comma separated list")
-	// 	verbose   = flag.Bool("verbose", false, "Turn on Sarama logging")
-	certFile = flag.String("certificate", "", "The optional certificate file for client authentication")
-
-	keyFile = flag.String("key", "", "The optional key file for client authentication")
-
-	caFile = flag.String("ca", "", "The optional certificate authority file for TLS client authentication")
-
-	verifySsl = flag.Bool("verify", false, "Optional verify ssl certificates chain")
-)
+// verifyKafkaProducerFlags does something
+func verifyKafkaProducerFlags() {
+	return
+}
 
 func createTLSConfiguration() (t *tls.Config) {
-	if *certFile != "" && *keyFile != "" && *caFile != "" {
-		cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
+	if certFile != "" && keyFile != "" && caFile != "" {
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		caCert, err := ioutil.ReadFile(*caFile)
+		caCert, err := ioutil.ReadFile(caFile)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +38,7 @@ func createTLSConfiguration() (t *tls.Config) {
 		t = &tls.Config{
 			Certificates:       []tls.Certificate{cert},
 			RootCAs:            caCertPool,
-			InsecureSkipVerify: *verifySsl,
+			InsecureSkipVerify: verifySsl,
 		}
 	}
 	// will be nil by default if nothing is provided
@@ -64,7 +58,18 @@ func LogObject(p sarama.AsyncProducer, key string, o interface{}, topic string) 
 }
 
 // NewObjectLogProducer creates a new object log AsyncProducer
-func NewObjectLogProducer(brokerList []string) sarama.AsyncProducer {
+func NewObjectLogProducer() sarama.AsyncProducer {
+	verifyKafkaProducerFlags()
+	if verbose {
+		sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
+	}
+
+	if brokerList == "" {
+		flag.PrintDefaults()
+	}
+
+	brokers := strings.Split(brokerList, ",")
+	fmt.Printf("Kafka brokers: %s\n", strings.Join(brokers, ", "))
 
 	// For the access log, we are looking for AP semantics, with high throughput.
 	// By creating batches of compressed messages, we reduce network I/O at a cost of more latency.
@@ -79,14 +84,14 @@ func NewObjectLogProducer(brokerList []string) sarama.AsyncProducer {
 	config.Producer.Compression = sarama.CompressionSnappy   // Compress messages
 	config.Producer.Flush.Frequency = 500 * time.Millisecond // Flush batches every 500ms
 
-	producer, err := sarama.NewAsyncProducer(brokerList, config)
+	producer, err := sarama.NewAsyncProducer(brokers, config)
 	if err != nil {
-		log.Fatalln("Failed to start Sarama producer:", err)
+		panic(fmt.Sprintf("Failed to start Sarama producer: %v\n", err))
 	}
 
 	go func() {
 		for success := range producer.Successes() {
-			log.Println("Successfully wrote entry:", success)
+			fmt.Println("Successfully wrote entry:", success)
 		}
 	}()
 
@@ -94,7 +99,7 @@ func NewObjectLogProducer(brokerList []string) sarama.AsyncProducer {
 	// Note: messages will only be returned here after all retry attempts are exhausted.
 	go func() {
 		for err := range producer.Errors() {
-			log.Println("Failed to write new_interaction entry:", err)
+			fmt.Println("Failed to write new object log entry:", err)
 		}
 	}()
 

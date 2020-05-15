@@ -42,7 +42,7 @@ clean-scoring:
 	$(GOCLEAN)
 	rm -f ./scoring/$(BUILD_DIR)/${BINARY_NAME}
 clean: clean-circle clean-proximity clean-scoring
-run: build
+run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 deps:
 	$(GOGET) mod download

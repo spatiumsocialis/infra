@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"errors"
-	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -12,24 +11,6 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
-)
-
-// Sarama configuration options
-var (
-	// Kafka bootstrap brokers to connect to, as a comma separated list
-	brokers = ""
-	// Kafka cluster version
-	version = "2.5.0"
-	// Kafka consumer group definition
-	group = ""
-	// Kafka topics to be consumed, as a comma separated list
-	topics = ""
-	// Consumer group partition assignment strategy (range, roundrobin, sticky)
-	assignor = "range"
-	//  Kafka consumer consume initial offset from oldest
-	oldest = true
-	// Sarama logging
-	verbose = false
 )
 
 type (
@@ -44,27 +25,11 @@ type (
 	}
 )
 
-// RegisterConsumerFlags registers the consumer flags
-func RegisterConsumerFlags() {
-	flag.StringVar(&brokers, "brokers", "", "Kafka bootstrap brokers to connect to, as a comma separated list")
-	flag.StringVar(&group, "group", "", "Kafka consumer group definition")
-	flag.StringVar(&version, "version", "2.5.0", "Kafka cluster version")
-	// flag.StringVar(&topics, "topics", "", "Kafka topics to be consumed, as a comma separated list")
-	flag.StringVar(&assignor, "assignor", "range", "Consumer group partition assignment strategy (range, roundrobin, sticky)")
-	flag.BoolVar(&oldest, "oldest", true, "Kafka consumer consume initial offset from oldest")
-	flag.BoolVar(&verbose, "verbose", false, "Sarama logging")
-}
-
-// ParseFlags parses the consumer flags
-func ParseFlags() {
-	flag.Parse()
-	if len(brokers) == 0 {
+// verifyKafkaConsumerFlags parses the consumer flags
+func verifyKafkaConsumerFlags() {
+	if len(brokerList) == 0 {
 		panic("no Kafka bootstrap brokers defined, please set the -brokers flag")
 	}
-
-	// if len(topics) == 0 {
-	// 	panic("no topics given to be consumed, please set the -topics flag")
-	// }
 
 	if len(group) == 0 {
 		panic("no Kafka consumer group defined, please set the -group flag")
@@ -73,6 +38,7 @@ func ParseFlags() {
 
 // NewConsumer starts a new consumer with the given message handler
 func NewConsumer(s *Service, topicHandlerMap map[string]MessageHandler) {
+	verifyKafkaConsumerFlags()
 	log.Println("Starting a new Sarama consumer")
 
 	if verbose {
@@ -83,6 +49,9 @@ func NewConsumer(s *Service, topicHandlerMap map[string]MessageHandler) {
 	if err != nil {
 		log.Panicf("Error parsing Kafka version: %v", err)
 	}
+
+	brokers := strings.Split(brokerList, ",")
+	log.Printf("Kafka brokers: %s", strings.Join(brokers, ", "))
 
 	/**
 	 * Construct a new Sarama configuration.
@@ -116,15 +85,17 @@ func NewConsumer(s *Service, topicHandlerMap map[string]MessageHandler) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	client, err := sarama.NewConsumerGroup(strings.Split(brokers, ","), group, config)
+	client, err := sarama.NewConsumerGroup(brokers, group, config)
 	if err != nil {
 		log.Panicf("Error creating consumer group client: %v", err)
 	}
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	topics := make([]string, len(topicHandlerMap))
+	topics := make([]string, 0)
+	log.Println("Topics")
 	for topic := range topicHandlerMap {
+		log.Println(topic)
 		topics = append(topics, topic)
 	}
 	go func() {
@@ -134,7 +105,7 @@ func NewConsumer(s *Service, topicHandlerMap map[string]MessageHandler) {
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
 			if err := client.Consume(ctx, topics, &consumer); err != nil {
-				log.Panicf("Error from consumer: %v", err)
+				log.Panicf("Error from consumer : %v", err)
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {

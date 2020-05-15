@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/safe-distance/socium-infra/circle/config"
 	"github.com/safe-distance/socium-infra/circle/pkg/routes"
@@ -15,22 +14,9 @@ import (
 )
 
 func main() {
+	common.RegisterKafkaClientFlags()
 	flag.Parse()
-
-	// if *verbose {
-	// 	sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
-	// }
-
-	brokers := os.Getenv("BROKERS")
-	if brokers == "" {
-		flag.PrintDefaults()
-		os.Exit(1)
-	}
-
-	brokerList := strings.Split(brokers, ",")
-	log.Printf("Kafka brokers: %s", strings.Join(brokerList, ", "))
-
-	producer := common.NewObjectLogProducer(brokerList)
+	producer := common.NewObjectLogProducer()
 	common.LoadEnv(false)
 	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
 	port := os.Getenv("PORT")

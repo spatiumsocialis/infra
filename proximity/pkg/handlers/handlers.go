@@ -7,7 +7,6 @@ import (
 	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/common"
 	"github.com/safe-distance/socium-infra/proximity/pkg/models"
-	"github.com/safe-distance/socium-infra/proximity/pkg/producer"
 )
 
 // AddInteraction handles requests for adding new interactions
@@ -31,7 +30,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		json.NewEncoder(w).Encode(&interaction)
 
 		// Log a new interaction (send msg to kafka)
-		producer.LogInteraction(s.Producer, &interaction, s.ProductionTopic)
+		common.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})

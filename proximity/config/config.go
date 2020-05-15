@@ -17,4 +17,4 @@ var Middleware = []mux.MiddlewareFunc{
 }
 
 // ProductionTopic is the Kafka topic this service produces to
-const ProductionTopic = "new_interaction"
+const ProductionTopic = "interaction_added"

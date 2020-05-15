@@ -1,4 +1,4 @@
-package producer
+package common
 
 import (
 	"flag"
@@ -9,31 +9,38 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/safe-distance/socium-infra/common"
-	"github.com/safe-distance/socium-infra/proximity/config"
-	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 )
 
-var s *common.Service
+const (
+	ProductionTopic = "interaction_added"
+	TestVal         = 5
+)
 
-var p sarama.AsyncProducer
+var (
+	s *Service
+	p sarama.AsyncProducer
+)
+
+type testObject struct {
+	val int
+}
 
 func TestMain(m *testing.M) {
 	flag.Parse()
 
-	if *verbose {
+	if verbose {
 		sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
 	}
 
-	if *brokers == "" {
+	if brokerList == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 
-	brokerList := strings.Split(*brokers, ",")
-	log.Printf("Kafka brokers: %s", strings.Join(brokerList, ", "))
+	brokers := strings.Split(brokerList, ",")
+	log.Printf("Kafka brokers: %s", strings.Join(brokers, ", "))
 
-	p = NewInteractionLogProducer(brokerList)
+	p = NewObjectLogProducer()
 
 	os.Exit(m.Run())
 
@@ -41,7 +48,7 @@ func TestMain(m *testing.M) {
 
 // TestInteractionHandler tests the interaction handler by sending a POST request to interactionHandler
 // to create a new Interaction, followed by a GET request to retrieve it, and ensuring  the two results are the same.
-func TestLogInteraction(t *testing.T) {
+func TestLogObject(t *testing.T) {
 	// Assign mock producer to service
 
 	go func() {
@@ -51,9 +58,9 @@ func TestLogInteraction(t *testing.T) {
 	}()
 
 	// Create a test interaction and a test token
-	testInteraction := &models.Interaction{Distance: 51, Duration: time.Duration(60e9), Timestamp: time.Now()}
+	o := &testObject{val: TestVal}
 
-	LogInteraction(p, testInteraction, config.ProductionTopic)
+	LogObject(p, string(o.val), o, ProductionTopic)
 
 	time.Sleep(5 * time.Second)
 }

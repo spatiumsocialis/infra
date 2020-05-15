@@ -27,7 +27,7 @@ const PeriodParameterString = "period"
 const RollingWindowDays = 14
 
 // ProductionTopic is the Kafka topic this service produces to
-const ProductionTopic = "new_interaction_score"
+const ProductionTopic = "interaction_scored"
 
 // Scores for events
 const (
