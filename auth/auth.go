@@ -14,6 +14,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// TestUID is the UID of a test user
+const TestUID = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
+
 const googleApplicationCredentialsKey = "GOOGLE_APPLICATION_CREDENTIALS"
 
 type contextKey string
@@ -53,7 +56,8 @@ func GetTokenFrom(ctx context.Context) (*Token, error) {
 		err := errors.New("Error: context doesn't contain a token")
 		return nil, err
 	}
-	return token.(*Token), nil
+	t := Token(*(token.(*auth.Token)))
+	return &t, nil
 }
 
 // AddTokenTo adds an access token to a request context

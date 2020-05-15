@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 services:
   reverse-proxy:
     # The official v2 Traefik docker image
@@ -49,11 +49,14 @@ services:
         EXECUTABLE: app
     environment: 
       KAFKA_PEERS: kafka:9092
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
       - 8080
+    secrets:
+      - google_application_credentials
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle/`)"
+      - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
       - "traefik.http.routers.circle_app.entrypoints=web"
   proximity-app:
     build: 
@@ -63,11 +66,14 @@ services:
         EXECUTABLE: app
     environment: 
       KAFKA_PEERS: kafka:9092
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
       - 8080
+    secrets:
+      - google_application_credentials
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity/`)"
+      - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity`)"
       - "traefik.http.routers.proximity_app.entrypoints=web"
   scoring-app:
     build:
@@ -77,8 +83,11 @@ services:
         EXECUTABLE: app
     environment: 
       KAFKA_PEERS: kafka:9092
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
       - 8080
+    secrets:
+      - google_application_credentials
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.scoring_app.rule=PathPrefix(`/scores`)"
@@ -94,8 +103,27 @@ services:
       KAFKA_CGROUP: scoring
     depends_on: 
       - kafka
+  location-app:
+    build:
+      context: .
+      args:
+        SERVICE: location
+        EXECUTABLE: app
+    environment: 
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
+    expose:
+      - 8080
+    secrets:
+      - google_application_credentials
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.location-app.rule=PathPrefix(`/location`)"
+      - "traefik.http.routers.location-app.entrypoints=web"
   start_dependencies:
       image: dadarek/wait-for-dependencies
       depends_on:
         - kafka
       command: kafka:9092
+secrets:
+  google_application_credentials:
+    file: secrets/firebase_service_key.json

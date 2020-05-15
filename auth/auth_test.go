@@ -1,14 +1,12 @@
 package auth
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -20,44 +18,9 @@ func addTokenToRequest(r *http.Request, token string) {
 }
 
 func testMiddlewareHelper(t *testing.T, shouldSucceed bool, testToken func(validToken string) string) {
-	// uid for matt@axial.technology user
-	const uid = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
 	// api key retrieved from https://console.firebase.google.com/u/0/project/safe-distance-e4683/settings/general
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-
-	if apiKey == "" {
-		t.Fatal("Error: GOOGLE_API_KEY env variable not set")
-	}
-
-	ctx := context.Background()
-	client, err := getFireBaseApp().Auth(ctx)
-	if err != nil {
-		t.Fatalf("Error getting Auth client: %v\n", err)
-	}
-
-	// Generate a custom token based off the uid
-	customToken, err := client.CustomToken(ctx, uid)
-	if err != nil {
-		t.Fatalf("Error minting custom token: %v\n", err)
-	}
-
-	// Request an ID token using the custom token
-	url := fmt.Sprintf("https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=%s", apiKey)
-	data := map[string]interface{}{"token": customToken, "returnSecureToken": true}
-	payload, _ := json.Marshal(data)
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
-	if err != nil {
-		t.Fatalf("Error requesting auth token: %v\n", err.Error())
-	}
-
-	if res.StatusCode != http.StatusOK {
-		t.Fatal("Error requesting auth token: request failed")
-	}
-
-	// Retrieve the ID token from the response
-	var bodyData map[string]interface{}
-	json.NewDecoder(res.Body).Decode(&bodyData)
-	token := bodyData["idToken"].(string)
+	token, err := GenerateToken(TestUID)
+	assert.Equal(t, err, nil, err.Error())
 
 	// Create a test Request with the ID token and a ResponseWriter
 	r, err := http.NewRequest("", "", nil)

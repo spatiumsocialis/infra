@@ -36,6 +36,8 @@ func AddToCircle(s *common.Service) http.Handler {
 			return
 		}
 
+		// Find circle
+		s.DB.FirstOrCreate(&circle, models.Circle{ID: circle.ID})
 		// Start association mode
 		association := s.DB.Model(&circle).Association("Users")
 		if association.Error != nil {
@@ -138,7 +140,7 @@ func GetCircle(s *common.Service) http.Handler {
 		}
 		// Fetch the current user's circle
 		var circle models.Circle
-		s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID})
+		s.DB.Preload("Users").Table("circles").First(&circle, models.Circle{ID: user.CircleID})
 		// Marshal the circle to JSON
 		payload, err := json.Marshal(circle)
 		if err != nil {

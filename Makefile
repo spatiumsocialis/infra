@@ -20,6 +20,8 @@ build-proximity-app:
 	$(GOBUILD) -o ./proximity/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./proximity/$(BUILD_DIR_APP)
 build-scoring-app:
 	$(GOBUILD) -o ./scoring/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./scoring/$(BUILD_DIR_APP)
+build-location-app:
+	$(GOBUILD) -o ./location/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./location/$(BUILD_DIR_APP)
 build-apps: build-circle-app build-proximity-app build-scoring-app
 build-circle-consumer:
 	$(GOBUILD) -o ./circle/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./circle/$(BUILD_DIR_CONSUMER)
