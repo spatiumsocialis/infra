@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -25,6 +26,15 @@ const (
 	DailyAllowance
 )
 
+var eventTypeToString = map[EventType]string{
+	ProximityInteraction: config.ProximityInteractionEventTypeString,
+	DailyAllowance:       config.DailyAllowanceEventTypeString,
+}
+
+func (e EventType) String() string {
+	return eventTypeToString[e]
+}
+
 // EventScore represents the scoring of an event
 type EventScore struct {
 	gorm.Model
@@ -33,6 +43,26 @@ type EventScore struct {
 	EventType EventType
 	Timestamp time.Time
 	Score     int
+}
+
+type eventScoreResponse struct {
+	UID       string
+	EventID   uint
+	EventType string
+	Timestamp time.Time
+	Score     int
+}
+
+// MarshalJSON returns a marshalled EventScore
+func (e EventScore) MarshalJSON() ([]byte, error) {
+	r := eventScoreResponse{
+		UID:       e.UID,
+		EventID:   e.EventID,
+		EventType: e.EventType.String(),
+		Timestamp: e.Timestamp,
+		Score:     e.Score,
+	}
+	return json.Marshal(r)
 }
 
 // CreateEventScore creates a new EventScore object and writes it to the database before returning it
@@ -71,6 +101,27 @@ func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
 		total += s.Score
 	}
 	return CircleScore{CircleID: user.CircleID, Score: total, UserScores: userScores}
+}
+
+// GetEventsInRange returns all the user's events in the given date range
+func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Time) []EventScore {
+	var eventScores []EventScore
+	db.Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start, end).Find(&eventScores)
+	return eventScores
+}
+
+// GetEventsInRollingWindow returns the events that occured in the rolling window preceding date
+func GetEventsInRollingWindow(db *gorm.DB, user auth.User, date time.Time) []EventScore {
+	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, nil).AddDate(0, 0, 1)
+	start := end.AddDate(0, 0, -config.RollingWindowDays)
+	return getEventsInRange(db, user, start, end)
+}
+
+// GetEventsOnDay returns the events that occured on the given date
+func GetEventsOnDay(db *gorm.DB, user auth.User, date time.Time) []EventScore {
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, nil)
+	end := start.AddDate(0, 0, 1)
+	return getEventsInRange(db, user, start, end)
 }
 
 func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Time, db *gorm.DB) CircleScore {

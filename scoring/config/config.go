@@ -35,5 +35,11 @@ const (
 	DailyAllowancePoints       = 1000
 )
 
+// Event type string representations
+const (
+	ProximityInteractionEventTypeString = "proximity interaction"
+	DailyAllowanceEventTypeString       = "daily allowance"
+)
+
 // AllUserID is the userID to use for event scores which apply to all users
 const AllUserID = "ALL"

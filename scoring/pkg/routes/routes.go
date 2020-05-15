@@ -17,4 +17,10 @@ var Routes = common.Routes{
 		Pattern:        fmt.Sprintf("/{%v}", config.PeriodParameterString),
 		ServiceHandler: handlers.GetCircleScoreForPeriod,
 	},
+	{
+		Name:           "GetEventScoresForPeriod",
+		Method:         strings.ToUpper("Get"),
+		Pattern:        fmt.Sprintf("/events/{%v}", config.PeriodParameterString),
+		ServiceHandler: handlers.GetEventScoresForPeriod,
+	},
 }
