@@ -80,7 +80,7 @@ func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Ti
 			"scores",
 		).Select(
 			"scores.uid",
-			"scorers.circle_id",
+			"users.circle_id",
 			"scores.value",
 		).Joins(
 			"left join users on users.uid = scores.uid",
