@@ -22,7 +22,7 @@ func GetCircleScoreForPeriod(s *common.Service) http.Handler {
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
-			http.Error(w, "Error retrieving current user: "+err.Error(), http.StatusBadRequest)
+			common.ThrowError(w, fmt.Errorf("error retrieving current user: %v", err))
 			return
 		}
 		// Get request vars

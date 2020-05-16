@@ -98,8 +98,8 @@ type CircleScore struct {
 func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
 	userScores := make([]UserScore, len(scores))
 	total := 0
-	for _, s := range scores {
-		userScores = append(userScores, UserScore{UID: s.UID, Score: s.Score})
+	for i, s := range scores {
+		userScores[i] = UserScore{UID: s.UID, Score: s.Score}
 		total += s.Score
 	}
 	return CircleScore{CircleID: user.CircleID, Score: total, UserScores: userScores}
@@ -140,7 +140,7 @@ func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Ti
 			"users.circle_id",
 			"scores.value",
 		).Joins(
-			"left join users on users.uid = scores.uid",
+			"left join users on users.id = scores.uid",
 		).Where(
 			"users.circle_id = ? AND timestamp BETWEEN ? AND ?",
 			user.CircleID,
@@ -155,10 +155,14 @@ func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Ti
 
 // GetDayCircleScoreForDate calculates a user's circle's scores for a certain date
 func GetDayCircleScoreForDate(user auth.User, date time.Time, db *gorm.DB) CircleScore {
-	return getCircleScoreForDates(user, date, date, db)
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
+	end := start.AddDate(0, 0, 1)
+	return getCircleScoreForDates(user, start, end, db)
 }
 
 // GetRollingWindowCircleScoreForDate calculates a user's circle's scores for a two week rolling window ending on date
 func GetRollingWindowCircleScoreForDate(user auth.User, date time.Time, db *gorm.DB) CircleScore {
-	return getCircleScoreForDates(user, date.AddDate(0, 0, -config.RollingWindowDays), date, db)
+	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
+	start := end.AddDate(0, 0, -config.RollingWindowDays)
+	return getCircleScoreForDates(user, start, end, db)
 }
