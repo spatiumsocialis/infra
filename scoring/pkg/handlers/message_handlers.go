@@ -57,29 +57,9 @@ func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 	return nil
 }
 
-func handleUserModifiedMessage(s *common.Service, m *sarama.ConsumerMessage) error {
-	var ole common.ObjectLogEntry
-
-	if err := json.Unmarshal(m.Value, &ole); err != nil {
-		return err
-	}
-
-	var user auth.User
-	if err := mapstructure.Decode(ole.Object, &user); err != nil {
-		return err
-	}
-
-	if err := s.DB.Save(&user).Error; err != nil {
-		return err
-	}
-
-	return nil
-
-}
-
 // TopicHandlerMap maps topic names to the handlers which handle messages consumed from them
 var TopicHandlerMap = map[string]common.MessageHandler{
 	"interaction_added":  handleInteractionAddedMessage,
 	"daily_points_added": handleDailyPointsAddedMessage,
-	"user_modified":      handleUserModifiedMessage,
+	"user_modified":      common.SaveUpdatedUserMessageHandler,
 }

@@ -1,6 +1,7 @@
 # infra
 
 ## Quickstart guide
+### Setup
 1. Install Docker Desktop https://docs.docker.com/docker-for-mac/install/
 2. From the project root, run the following to set the `DOCKERHOST` env variable
 ```
@@ -15,6 +16,9 @@ GOOGLE_API_KEY="your google api key"
 GOOGLE_APPLICATION_CREDENTIALS=path/to/google/service/account.json
 ```
 4. From the project root, run `chmod +x *.sh` to enable execution on the scripts
-4. Run `./build.sh` to build the services
-5. Run `./start.sh` to start the services
-6. Run `./stop.sh` to stop the services
+### Build
+Run `./build.sh` to build the services
+### Start
+Run `./start.sh` to start the services
+### Stop
+Run `./stop.sh` to stop the services

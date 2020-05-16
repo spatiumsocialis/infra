@@ -1,363 +1,411 @@
-openapi: 3.0.1
-info:
-  title: Spacium Socialis
-  description: This is the Spacium Socialis API specification
-  termsOfService: http://swagger.io/terms/
-  contact:
-    email: apiteam@swagger.io
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
-servers:
-- url: https://spaciumsocialis.com/v1
-tags:
-- name: proximity
-  description: Tracking interaction events
-- name: circle
-  description: Operations about My Circle
-- name: location
-  description: Tracking user locations
-- name: scores
-  description: Scoring social distancing habits
-paths:
-  /proximity/interactions:
-    get:
-      tags:
-      - proximity
-      summary: Get the current user's interactions
-      operationId: getInteractions
-      parameters:
-      - name: start
-        in: query
-        description: Filter out interactions before this timestamp
-        schema:
-          type: string
-      - name: end
-        in: query
-        description: Filter out interactions after this timestamp
-        schema:
-          type: string
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
+  openapi: 3.0.1
+  info:
+    title: Spacium Socialis
+    description: This is the Spacium Socialis API specification
+    termsOfService: http://swagger.io/terms/
+    contact:
+      email: apiteam@swagger.io
+    license:
+      name: Apache 2.0
+      url: http://www.apache.org/licenses/LICENSE-2.0.html
+    version: 1.0.0
+  externalDocs:
+    description: Find out more about Swagger
+    url: http://swagger.io
+  servers:
+  - url: https://spacium-socialis.com/
+  tags:
+  - name: proximity
+    description: Tracking interaction events
+  - name: circle
+    description: Operations about My Circle
+  - name: location
+    description: Tracking user locations
+  - name: scores
+    description: Scoring social distancing habits
+  paths:
+    /proximity/interactions:
+      get:
+        tags:
+        - proximity
+        summary: Get the current user's interactions
+        operationId: getInteractions
+        parameters:
+        - name: start
+          in: query
+          description: Filter out interactions before this RFC3339 timestamp
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: Filter out interactions after this RFC3339 timestamp
+          schema:
+            type: string
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Interaction'
+          401:
+            description: Unauthorized request
+            content: {}
+      post:
+        tags:
+        - proximity
+        summary: Log a new proximity interaction event
+        operationId: addInteraction
+        requestBody:
+          $ref: '#/components/requestBodies/InteractionRequestBody'
+        responses:
+          200:
+            description: Success operation
+            content:
+              application/json:
+                schema:
                   $ref: '#/components/schemas/Interaction'
-        401:
-          description: Unauthorized request
-          content: {}
-    post:
-      tags:
-      - proximity
-      summary: Log a new proximity interaction event
-      operationId: addInteraction
-      requestBody:
+          401:
+            description: Unauthorized request
+            content: {}
+          405:
+            description: Invalid input
+            content: {}
+        x-codegen-request-body-name: body
+    /circle:
+      get:
+        tags:
+        - circle
+        summary: Get the current user's circle
+        operationId: getCircle
+        responses:
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Circle'
+          400:
+            description: Invalid status value
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+    /circle/add:
+      patch:
+        tags:
+        - circle
+        summary: Add current user to a circle
+        description: Current user will be added to the circle with the supplied ID.
+          This endpoint is to be used in the circle invitation flow. Invited user will
+          receive a text with a deeplink containing the circle ID which triggers this
+          call.
+        operationId: addToCircle
+        requestBody:
+          $ref: '#/components/requestBodies/CirclePatchRequestBody'
+        responses:
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Circle'
+          400:
+            description: Invalid status value
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+        x-codegen-request-body-name: body
+    /circle/remove:
+      patch:
+        tags:
+        - circle
+        summary: Remove a user from a circle
+        description: User with supplied ID will be removed from the current user's circle,
+          if they were in it. If they were not in the current user's circle or the current
+          user isn't in a circle, an error will be returned
+        operationId: removeFromCircle
+        requestBody:
+          $ref: '#/components/requestBodies/CirclePatchRequestBody'
+        responses:
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Circle'
+          400:
+            description: Invalid status value
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+        x-codegen-request-body-name: body
+    /location/pings:
+      get:
+        tags:
+        - location
+        summary: Get list of location pings
+        description: Returns a list of LocationPings
+        operationId: getLocationPings
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/LocationPing'
+          400:
+            description: Invalid query parameters
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+      post:
+        tags:
+        - location
+        summary: Log a new location ping
+        description: Creates a new LocationPing
+        operationId: createLocationPing
+        requestBody:
+          $ref: "#/components/requestBodies/LocationPingPostRequestBody"
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/LocationPing'
+          400:
+            description: Invalid query parameters
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+    /scores/{period}:
+      get:
+        tags:
+        - scores
+        summary: Get current user's circle scores over a period
+        description: Return score aggregations for current user's circle
+        operationId: getScoreForPeriod
+        parameters:
+        - name: period
+          in: path
+          description: Period to aggregate scores over
+          required: true
+          schema:
+            $ref: '#/components/schemas/Period'
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/CircleScore'
+          400:
+            description: Invalid period supplied
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+    /scores/events/{period}:
+      get:
+        tags:
+        - scores
+        summary: Get current user's event scores for a given period
+        description: Return event scores for a given user in a period
+        operationId: getEventScoresForPeriod
+        parameters:
+        - name: period
+          in: path
+          description: Period to aggregate scores over
+          required: true
+          schema:
+            $ref: '#/components/schemas/Period'
+        responses:
+          200:
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items: 
+                    $ref: '#/components/schemas/EventScore'
+          400:
+            description: Invalid period supplied
+            content: {}
+          401:
+            description: Unauthorized request
+            content: {}
+  components:
+    requestBodies:
+      InteractionRequestBody:
         description: Interaction event that needs to be logged
+        required: true
         content:
           application/json:
             schema:
-              required:
-              - distance
-              - duration
-              - timestamp
-              type: object
-              properties:
-                distance:
-                  type: number
-                  description: average distance between the user and the other party
-                    in centimeters
-                  format: float32
-                  example: 43.5
-                duration:
-                  type: integer
-                  description: duration of the interaction in milliseconds
-                  format: int64
-                  example: 312000
-                timestamp:
-                  type: string
-                  description: timestamp of the beginning of the interaction in RFC3339
-                  format: string
-                  example: "2006-01-02T15:04:05+07:00"
-        required: false
-      responses:
-        200:
-          description: Success operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Interaction'
-        401:
-          description: Unauthorized request
-          content: {}
-        405:
-          description: Invalid input
-          content: {}
-      x-codegen-request-body-name: body
-  /circle:
-    get:
-      tags:
-      - circle
-      summary: Get the current user's circle
-      operationId: getCircle
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Circle'
-        400:
-          description: Invalid status value
-          content: {}
-        401:
-          description: Unauthorized request
-          content: {}
-  /circle/add:
-    patch:
-      tags:
-      - circle
-      summary: Add current user to a circle
-      description: Current user will be added to the circle with the supplied ID.
-        This endpoint is to be used in the circle invitation flow. Invited user will
-        receive a text with a deeplink containing the circle ID which triggers this
-        call.
-      operationId: addToCircle
-      requestBody:
-        description: Circle to add user to
+              $ref: '#/components/schemas/InteractionPostBody'
+      LocationPingPostRequestBody:
+        description: Location ping that needs to be logged
+        required: true
         content:
           application/json:
             schema:
-              required:
-              - id
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: id of the circle to join
-        required: false
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Circle'
-        400:
-          description: Invalid status value
-          content: {}
-        401:
-          description: Unauthorized request
-          content: {}
-      x-codegen-request-body-name: body
-  /circle/remove:
-    patch:
-      tags:
-      - circle
-      summary: Remove a user from a circle
-      description: User with supplied ID will be removed from the current user's circle,
-        if they were in it. If they were not in the current user's circle or the current
-        user isn't in a circle, an error will be returned
-      operationId: removeFromCircle
-      requestBody:
-        description: User to remove from current user's circle
+              $ref: '#/components/schemas/LocationPingPostBody'
+      CirclePatchRequestBody:
+        description: Circle request body
+        required: true
         content:
           application/json:
             schema:
-              required:
-              - uid
-              type: object
-              properties:
-                uid:
-                  type: string
-                  description: UID of the user to remove
-        required: false
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Circle'
-        400:
-          description: Invalid status value
-          content: {}
-        401:
-          description: Unauthorized request
-          content: {}
-      x-codegen-request-body-name: body
-  /location/clusters:
-    get:
-      tags:
-      - location
-      summary: Get clusters of user locations
-      description: Returns a list of LocationClusters with center points within a
-        certain radius from provided point
-      operationId: getLocationClusters
-      parameters:
-      - name: lat
-        in: query
-        description: latitude of center point
-        required: true
-        schema:
-          type: number
-      - name: long
-        in: query
-        description: longitude of center point
-        required: true
-        schema:
-          type: number
-      - name: radius
-        in: query
-        description: radius around center point
-        required: true
-        schema:
-          type: number
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/LocationCluster'
-        400:
-          description: Invalid query parameters
-          content: {}
-        401:
-          description: Unauthorized request
-          content: {}
-  /scores/{period}:
-    get:
-      tags:
-      - scores
-      summary: Get current user's circle scores over a period
-      description: Return score aggregations for current user's circle
-      operationId: getScoreForPeriod
-      parameters:
-      - name: period
-        in: path
-        description: Period to aggregate scores over
-        required: true
-        schema:
-          type: string
-          enum:
-          - today
-          - overall
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CircleScore'
-        400:
-          description: Invalid period supplied
-          content: {}
-        401:
-          description: Unauthorized request
-          content: {}
-components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          description: User's Firebase UID
-        circleId:
-          type: string
-          description: ID of the user's Circle
-    Circle:
-      type: object
-      properties:
-        id:
-          type: string
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-    Interaction:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: uint
-        uid:
-          type: string
-          description: UID of the user logging the interaction
-        distance:
-          type: number
-          description: average distance between the user and the other party in centimeters
-          format: float32
-          example: 43.5
-        duration:
-          type: integer
-          description: duration of the interaction in milliseconds
-          format: int64
-        timestamp:
-          type: string
-          description: timestamp of the beginning of the interaction in RFC3339
-          example: "2006-01-02T15:04:05+07:00"
-    LocationCluster:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: database ID
-          format: int64
-        lat:
-          type: number
-          description: latitude of center point
-          format: float32
-        long:
-          type: number
-          description: longitude of center point
-          format: float32
-        radius:
-          type: number
-          description: radius around center clustered to this point
-          format: float32
-        count:
-          type: integer
-          description: number of location pings in the cluster
-          format: int32
-    UserScore:
-      type: object
-      properties:
-        uid:
-          type: string
-          description: id of the user
-        score:
-          type: number
-          description: user's score value
-          format: int32
-    CircleScore:
-      type: object
-      properties:
-        circleId:
-          type: string
-          description: id of the circle
-        score:
-          type: integer
-          description: overall score for the circle
-          format: int32
-        userScores:
-          type: array
-          description: scores for the individual users
-          items:
-            $ref: '#/components/schemas/UserScore'
-  securitySchemes:
-    firebaseAuth:          # arbitrary name for the security scheme
-      type: http
-      scheme: bearer
-      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
-security:
-  - firebaseAuth: []         # use the same name as above
+              $ref: '#/components/schemas/CirclePatchBody'
+    schemas:
+      Period:
+        type: object
+        properties:
+          period:
+            type: string
+            enum:
+            - day
+            - 2week
+        
+      User:
+        type: object
+        properties:
+          id:
+            type: string
+            description: User's Firebase UID
+          circleId:
+            type: string
+            description: ID of the user's Circle
+      Circle:
+        type: object
+        properties:
+          id:
+            type: string
+          users:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+      CirclePatchBody:
+        type: object
+        properties:
+          id:
+            type: string
+            description: id of the circle
+      Interaction:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: uint
+          uid:
+            type: string
+            description: id of the user logging the interaction
+          distance:
+            type: number
+            description: average distance between the user and the other party in centimeters
+            example: 43.5
+          duration:
+            type: integer
+            description: duration of the interaction in milliseconds
+          timestamp:
+            type: string
+            description: timestamp of the beginning of the interaction in RFC3339
+            example: "2006-01-02T15:04:05+07:00"
+      InteractionPostBody:
+        type: object
+        properties:
+          distance:
+            type: number
+            description: average distance between the user and the other party in centimeters
+            example: 43.5
+          duration:
+            type: integer
+            description: duration of the interaction in milliseconds
+          timestamp:
+            type: string
+            description: timestamp of the beginning of the interaction in RFC3339
+            example: "2006-01-02T15:04:05+07:00"
+      LocationPing:
+        type: object
+        properties:
+          lat:
+            type: number
+            description: latitude of center point
+          lon:
+            type: number
+            description: longitude of center point
+          timestamp:
+            type: string
+            description: timestamp of the beginning of the interaction in RFC3339
+            example: "2006-01-02T15:04:05+07:00"
+      LocationPingPostBody:
+        type: object
+        properties:
+          lat:
+            type: number
+            description: latitude of center point
+          lon:
+            type: number
+            description: longitude of center point
+          timestamp:
+            type: string
+            description: timestamp of the beginning of the interaction in RFC3339
+            example: "2006-01-02T15:04:05+07:00"
+      UserScore:
+        type: object
+        properties:
+          uid:
+            type: string
+            description: id of the user
+          score:
+            type: number
+            description: user's score value
+      CircleScore:
+        type: object
+        properties:
+          circleId:
+            type: string
+            description: id of the circle
+          score:
+            type: integer
+            description: overall score for the circle
+          userScores:
+            type: array
+            description: scores for the individual users
+            items:
+              $ref: '#/components/schemas/UserScore'
+      EventScore:
+        type: object
+        properties:
+          uid:
+            type: string
+            description: id of the user
+          eventId:
+            type: integer
+            description: id of the event
+          eventType:
+            type: string
+            description: "type of event: proximity_interaction, daily_allowance"
+          timestamp:
+            type: string
+            description: timestamp of the event in RFC3339
+            example: "2006-01-02T15:04:05+07:00"
+          score:
+            type: integer
+            description: the acutal score of the event
+    securitySchemes:
+      firebaseAuth:          # arbitrary name for the security scheme
+        type: http
+        scheme: bearer
+        bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+  security:
+    - firebaseAuth: []         # use the same name as above
