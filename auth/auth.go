@@ -114,9 +114,9 @@ func Middleware(next http.Handler) http.Handler {
 type User struct {
 	ID        string
 	CircleID  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-"`
 }
 
 // GetUser retrieves the UID from a request's token and returns the user model

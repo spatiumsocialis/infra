@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -41,6 +42,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		interaction.UID = user.ID
 		s.DB.Create(&interaction)
 		json.NewEncoder(w).Encode(&interaction)
+		fmt.Printf("created interaction: %+v\n", interaction)
 
 		// Log a new interaction (send msg to kafka)
 		common.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)

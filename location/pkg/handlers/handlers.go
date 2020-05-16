@@ -27,6 +27,7 @@ func AddPing(s *common.Service) http.Handler {
 		}
 		log.Printf("request ping: %+v\n", ping)
 		s.DB.Create(&ping)
+		log.Printf("created ping: %+v\n", ping)
 		json.NewEncoder(w).Encode(&ping)
 
 		// // Log a new interaction (send msg to kafka)
