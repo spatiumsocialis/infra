@@ -2,11 +2,12 @@ package common
 
 import (
 	"encoding/json"
+	"log"
 )
 
 // ObjectLogEntry represents a log entry containing an object which gets produced
 type ObjectLogEntry struct {
-	Object interface{}
+	Object json.RawMessage
 
 	encoded []byte
 	err     error
@@ -19,20 +20,24 @@ func (o *ObjectLogEntry) ensureEncoded() {
 }
 
 // Length returns the number of bytes in the encoded ObjectLogEntry
-func (o *ObjectLogEntry) Length() int {
+func (o ObjectLogEntry) Length() int {
 	o.ensureEncoded()
 	return len(o.encoded)
 }
 
 // Encode encodes the ObjectLogEntry
-func (o *ObjectLogEntry) Encode() ([]byte, error) {
+func (o ObjectLogEntry) Encode() ([]byte, error) {
 	o.ensureEncoded()
 	return o.encoded, o.err
 }
 
 // NewObjectLogEntry returns a new ObjectLogEntry
 func NewObjectLogEntry(object interface{}) ObjectLogEntry {
+	o, err := json.Marshal(object)
+	if err != nil {
+		log.Fatalf("error marshalling object: %v", err)
+	}
 	return ObjectLogEntry{
-		Object: object,
+		Object: o,
 	}
 }

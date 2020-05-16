@@ -47,9 +47,7 @@ func createTLSConfiguration() (t *tls.Config) {
 
 // LogObject sends an object to the appropriate kafka topic
 func LogObject(p sarama.AsyncProducer, key string, o interface{}, topic string) {
-	entry := &ObjectLogEntry{
-		Object: o,
-	}
+	entry := NewObjectLogEntry(o)
 	p.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
 		Key:   sarama.StringEncoder(key),

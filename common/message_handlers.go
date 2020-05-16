@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/Shopify/sarama"
-	"github.com/mitchellh/mapstructure"
 	"github.com/safe-distance/socium-infra/auth"
 )
 
@@ -21,7 +20,7 @@ func SaveUpdatedUserMessageHandler(s *Service, m *sarama.ConsumerMessage) error 
 	log.Printf("ole: %+v\n", ole)
 
 	var user auth.User
-	if err := mapstructure.Decode(ole.Object, &user); err != nil {
+	if err := json.Unmarshal(ole.Object, &user); err != nil {
 		return fmt.Errorf("error decoding user message: %v", err)
 	}
 

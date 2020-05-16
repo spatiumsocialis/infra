@@ -106,21 +106,25 @@ func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
 }
 
 // GetEventsInRange returns all the user's events in the given date range
-func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Time) []EventScore {
+func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Time) ([]EventScore, error) {
 	var eventScores []EventScore
-	db.Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start, end).Find(&eventScores)
-	return eventScores
+	if err := db.Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start.Format(time.RFC3339), end.Format(time.RFC3339)).
+		Find(&eventScores).
+		Error; err != nil {
+		return eventScores, err
+	}
+	return eventScores, nil
 }
 
 // GetEventsInRollingWindow returns the events that occured in the rolling window preceding date
-func GetEventsInRollingWindow(db *gorm.DB, user auth.User, date time.Time) []EventScore {
+func GetEventsInRollingWindow(db *gorm.DB, user auth.User, date time.Time) ([]EventScore, error) {
 	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	start := end.AddDate(0, 0, -config.RollingWindowDays)
 	return getEventsInRange(db, user, start, end)
 }
 
 // GetEventsOnDay returns the events that occured on the given date
-func GetEventsOnDay(db *gorm.DB, user auth.User, date time.Time) []EventScore {
+func GetEventsOnDay(db *gorm.DB, user auth.User, date time.Time) ([]EventScore, error) {
 	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
 	end := start.AddDate(0, 0, 1)
 	return getEventsInRange(db, user, start, end)
@@ -140,11 +144,11 @@ func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Ti
 		).Where(
 			"users.circle_id = ? AND timestamp BETWEEN ? AND ?",
 			user.CircleID,
-			startDate,
-			endDate,
+			startDate.Format(time.RFC3339),
+			endDate.Format(time.RFC3339),
 		).Find(&scores)
 	} else {
-		db.Where("timestamp BETWEEN ? AND ? AND uid = ?", startDate, endDate, user.ID).Find(&scores)
+		db.Where("timestamp BETWEEN ? AND ? AND uid = ?", startDate.Format(time.RFC3339), endDate.Format(time.RFC3339), user.ID).Find(&scores)
 	}
 	return calculateCircleScore(user, scores)
 }

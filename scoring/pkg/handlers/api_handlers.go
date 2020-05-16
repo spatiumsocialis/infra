@@ -18,6 +18,7 @@ import (
 // GetCircleScoreForPeriod handles requests to get a circle score for a period
 func GetCircleScoreForPeriod(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -50,13 +51,13 @@ func GetCircleScoreForPeriod(s *common.Service) http.Handler {
 
 		// Write to the response
 		w.Write(payload)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }
 
 // GetEventScoresForPeriod returns event scores in a given period
 func GetEventScoresForPeriod(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -70,10 +71,21 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 		period := vars[config.PeriodParameterString]
 		var eventScores []models.EventScore
 
-		if period == "" || period == "2week" {
-			eventScores = models.GetEventsInRollingWindow(s.DB, user, time.Now())
+		if period == "all" {
+			if err := s.DB.Where("uid = ? OR uid = ?", user.ID, config.AllUserID).Find(&eventScores).Error; err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else if period == "2week" {
+			eventScores, err = models.GetEventsInRollingWindow(s.DB, user, time.Now())
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		} else if period == "day" {
-			eventScores = models.GetEventsOnDay(s.DB, user, time.Now())
+			eventScores, err = models.GetEventsOnDay(s.DB, user, time.Now())
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		} else {
 			err := fmt.Errorf("Error: '%s' is not a valid period", period)
 			log.Println(err.Error())
@@ -89,6 +101,5 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 
 		// Write to the response
 		w.Write(payload)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }

@@ -5,7 +5,7 @@
 1. Install Docker Desktop https://docs.docker.com/docker-for-mac/install/
 2. From the project root, run the following to set the `DOCKERHOST` env variable
 ```
-export DOCKERHOST=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d: | head -n1)
+source dockerhost.sh
 ```
 3. Create a .env file with the following variables
 ```
