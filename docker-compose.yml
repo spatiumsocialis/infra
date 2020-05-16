@@ -75,6 +75,17 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity`)"
       - "traefik.http.routers.proximity_app.entrypoints=web"
+  proximity-consumer:
+    build: 
+      context: .
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: consumer
+    environment: 
+      KAFKA_PEERS: kafka:9092
+      KAFKA_CGROUP: proximity
+    depends_on: 
+      - kafka
   scoring-app:
     build:
       context: .
