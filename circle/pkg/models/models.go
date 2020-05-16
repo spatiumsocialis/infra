@@ -17,7 +17,7 @@ var Schema = common.Schema{
 type Circle struct {
 	ID        string
 	Users     []auth.User
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `json:"-" sql:"index"`
 }

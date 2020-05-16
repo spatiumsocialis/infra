@@ -22,9 +22,10 @@ func AddPing(s *common.Service) http.Handler {
 		// Decode the interaction from the request body
 		var ping models.Ping
 		if err := json.NewDecoder(r.Body).Decode(&ping); err != nil {
-			http.Error(w, "Error decoding interaction from request: "+err.Error(), http.StatusBadRequest)
+			http.Error(w, "Error decoding ping from request: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Printf("request ping: %+v\n", ping)
 		s.DB.Create(&ping)
 		json.NewEncoder(w).Encode(&ping)
 

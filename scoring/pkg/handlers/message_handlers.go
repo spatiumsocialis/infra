@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -19,7 +20,9 @@ func handleInteractionAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 	var ole common.ObjectLogEntry
 	json.Unmarshal(m.Value, &ole)
 	var i pmodels.Interaction
-	mapstructure.Decode(ole.Object, &i)
+	if err := mapstructure.Decode(ole.Object, &i); err != nil {
+		return fmt.Errorf("error decoding interaction: %v", err)
+	}
 
 	log.Printf("umarshalled interaction: %+v\n", i)
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/safe-distance/socium-infra/auth"
@@ -25,6 +26,7 @@ func AddInteraction(s *common.Service) http.Handler {
 			http.Error(w, "Error decoding interaction from request: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Printf("request interaction: %+v\n", interaction)
 		// Check whether other user is in current user's circle
 		otherUserUID := interaction.UID
 		var otherUser auth.User

@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -77,6 +78,7 @@ func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType
 	if err := db.Create(&es).Error; err != nil {
 		return &es, err
 	}
+	log.Printf("event score created: %+v\n", es)
 	return &es, nil
 }
 

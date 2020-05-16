@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/Shopify/sarama"
 	"github.com/mitchellh/mapstructure"
@@ -16,6 +17,8 @@ func SaveUpdatedUserMessageHandler(s *Service, m *sarama.ConsumerMessage) error 
 	if err := json.Unmarshal(m.Value, &ole); err != nil {
 		return fmt.Errorf("error unmarshalling user message: %v", err)
 	}
+
+	log.Printf("ole: %+v\n", ole)
 
 	var user auth.User
 	if err := mapstructure.Decode(ole.Object, &user); err != nil {
