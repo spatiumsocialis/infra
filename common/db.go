@@ -31,6 +31,9 @@ func NewDB(models ...interface{}) (*gorm.DB, error) {
 
 	// Migrate the schema
 	log.Println("Auto-migrating schema")
-	db.AutoMigrate(models...)
+	if err := db.AutoMigrate(models...).Error; err != nil {
+		log.Fatalf("error migrating db: %v\n", err.Error())
+	}
+
 	return db, nil
 }

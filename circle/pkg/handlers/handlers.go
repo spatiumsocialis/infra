@@ -17,6 +17,7 @@ import (
 // AddToCircle returns a handler which adds the current user to the specified circle
 func AddToCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -26,20 +27,23 @@ func AddToCircle(s *common.Service) http.Handler {
 		// Read the request body
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Error reading request body :"+err.Error(), http.StatusBadRequest)
+			http.Error(w, "Error reading request body: "+err.Error(), http.StatusBadRequest)
 			return
 		}
 		// Unmarshal the circle
 		var circle models.Circle
-		err = json.Unmarshal(body, &circle)
-		if err != nil {
-			http.Error(w, "Error unmarshalling circle :"+err.Error(), http.StatusBadRequest)
+		if err := json.Unmarshal(body, &circle); err != nil {
+			http.Error(w, "Error unmarshalling circle: "+err.Error(), http.StatusBadRequest)
 			return
 		}
 
+		if circle.ID == "" {
+			http.Error(w, "bad request: 'id' parameter missing from request body", http.StatusBadRequest)
+		}
+
 		// Find circle
-		if err := s.DB.FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
-			http.Error(w, "Error retrieving/creating circle:"+err.Error(), http.StatusInternalServerError)
+		if err := s.DB.Table("circles").FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
+			http.Error(w, "Error retrieving/creating circle: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		fmt.Printf("circle: %+v\n", circle)
@@ -51,9 +55,7 @@ func AddToCircle(s *common.Service) http.Handler {
 
 		// Add the user to the group
 		association.Append(&user)
-
-		// Retrieve the updated circle
-		s.DB.Preload("Users").Find(&circle, models.Circle{ID: user.CircleID})
+		s.DB.Save(&user)
 
 		payload, err := json.Marshal(circle)
 		if err != nil {
@@ -65,13 +67,13 @@ func AddToCircle(s *common.Service) http.Handler {
 
 		// Write the user back to the response
 		w.Write(payload)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }
 
 // RemoveFromCircle removes the current user from their circle
 func RemoveFromCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -130,13 +132,13 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 		}
 		// Write the circle back to the response
 		w.Write(payload)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }
 
 // GetCircle writes the current user's circle to the response
 func GetCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -145,7 +147,10 @@ func GetCircle(s *common.Service) http.Handler {
 		}
 		// Fetch the current user's circle
 		var circle models.Circle
-		s.DB.Preload("Users").Table("circles").First(&circle, models.Circle{ID: user.CircleID})
+		if err := s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID}).Error; err != nil {
+			http.Error(w, "error fetching circle: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
 		// Marshal the circle to JSON
 		payload, err := json.Marshal(circle)
 		if err != nil {
@@ -153,6 +158,5 @@ func GetCircle(s *common.Service) http.Handler {
 		}
 		// Write the JSON payload to the response
 		w.Write(payload)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }

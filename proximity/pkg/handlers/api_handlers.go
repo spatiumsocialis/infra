@@ -12,6 +12,7 @@ import (
 // AddInteraction handles requests for adding new interactions
 func AddInteraction(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -28,7 +29,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		otherUserUID := interaction.UID
 		var otherUser auth.User
 		s.DB.First(&otherUser, auth.User{ID: otherUserUID})
-		if otherUser.CircleID == user.CircleID {
+		if otherUser.CircleID != "" && otherUser.CircleID == user.CircleID {
 			w.Write([]byte("Users in same circle"))
 			return
 		}
@@ -40,13 +41,13 @@ func AddInteraction(s *common.Service) http.Handler {
 		// Log a new interaction (send msg to kafka)
 		common.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)
 
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }
 
 // GetInteractions handles requests to get the current user's interaction
 func GetInteractions(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
@@ -58,6 +59,5 @@ func GetInteractions(s *common.Service) http.Handler {
 		s.DB.Find(&interactions, models.Interaction{UID: user.ID})
 		json.NewEncoder(w).Encode(interactions)
 
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }

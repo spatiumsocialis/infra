@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/safe-distance/socium-infra/circle/config"
+	"github.com/safe-distance/socium-infra/circle/pkg/models"
 	"github.com/safe-distance/socium-infra/circle/pkg/routes"
 	"github.com/safe-distance/socium-infra/common"
-	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 )
 
 func main() {

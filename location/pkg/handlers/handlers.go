@@ -18,6 +18,7 @@ func throwError(w http.ResponseWriter, err error) {
 // AddPing handles requests for adding new pings
 func AddPing(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Decode the interaction from the request body
 		var ping models.Ping
 		if err := json.NewDecoder(r.Body).Decode(&ping); err != nil {
@@ -30,13 +31,13 @@ func AddPing(s *common.Service) http.Handler {
 		// // Log a new interaction (send msg to kafka)
 		// common.LogObject(s.Producer, string(ping.ID), ping, s.ProductionTopic)
 
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }
 
 // GetPings handles requests to get all the pings
 func GetPings(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		var pings []models.Ping
 		if err := s.DB.Find(&pings).Error; err != nil {
 			throwError(w, fmt.Errorf("error finding pings: %v", err))
@@ -46,6 +47,5 @@ func GetPings(s *common.Service) http.Handler {
 			throwError(w, fmt.Errorf("error encoding pings: %v", err))
 
 		}
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	})
 }

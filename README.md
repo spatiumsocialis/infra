@@ -17,8 +17,8 @@ GOOGLE_APPLICATION_CREDENTIALS=path/to/google/service/account.json
 ```
 4. From the project root, run `chmod +x *.sh` to enable execution on the scripts
 ### Build
-Run `./build.sh` to build the services
+Run `make build` to build the services
 ### Start
-Run `./start.sh` to start the services
+Run `make start` to start the services
 ### Stop
-Run `./stop.sh` to stop the services
+Run `make stop` to stop the services

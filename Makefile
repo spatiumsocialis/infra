@@ -30,7 +30,7 @@ build-proximity-consumer:
 build-scoring-consumer:
 	$(GOBUILD) -o ./scoring/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./scoring/$(BUILD_DIR_CONSUMER)
 build-consumers: build-circle-consumer build-proximity-consumer build-scoring-consumer
-build: build-apps build-consumers
+build-all-bins: build-apps build-consumers
 test: 
 	$(GOTEST) -v ./$(PACKAGE)... $(ARGS)
 .PHONY: test
@@ -48,3 +48,16 @@ run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 deps:
 	$(GOGET) mod download
+start:
+	docker-compose run --rm start_dependencies
+	docker-compose up -d
+	@echo Services up and running!
+	@echo Traefik dashboard available at ${DOCKERHOST}:8080
+	@echo Services available at ${DOCKERHOST}:80
+build:
+	docker build -t dependencies -f ./dependencies.Dockerfile .
+	docker-compose build
+	@echo Services built!
+stop:
+	docker-compose down
+	@echo Services torn down

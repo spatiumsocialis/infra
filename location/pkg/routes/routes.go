@@ -17,7 +17,7 @@ var Routes = common.Routes{
 	},
 
 	{
-		Name:           "GetClusters",
+		Name:           "GetPings",
 		Method:         strings.ToUpper("Get"),
 		Pattern:        "/pings",
 		ServiceHandler: handlers.GetPings,
