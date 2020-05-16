@@ -31,8 +31,6 @@ func NewDB(models ...interface{}) (*gorm.DB, error) {
 
 	// Migrate the schema
 	log.Println("Auto-migrating schema")
-	for _, model := range models {
-		db = db.AutoMigrate(model)
-	}
+	db.AutoMigrate(models...)
 	return db, nil
 }

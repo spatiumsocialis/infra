@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -37,7 +38,11 @@ func AddToCircle(s *common.Service) http.Handler {
 		}
 
 		// Find circle
-		s.DB.FirstOrCreate(&circle, models.Circle{ID: circle.ID})
+		if err := s.DB.FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
+			http.Error(w, "Error retrieving/creating circle:"+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("circle: %+v\n", circle)
 		// Start association mode
 		association := s.DB.Model(&circle).Association("Users")
 		if association.Error != nil {

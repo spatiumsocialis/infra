@@ -24,6 +24,14 @@ func AddInteraction(s *common.Service) http.Handler {
 			http.Error(w, "Error decoding interaction from request: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+		// Check whether other user is in current user's circle
+		otherUserUID := interaction.UID
+		var otherUser auth.User
+		s.DB.First(&otherUser, auth.User{ID: otherUserUID})
+		if otherUser.CircleID == user.CircleID {
+			w.Write([]byte("Users in same circle"))
+			return
+		}
 		// Add the user's UID from the auth token to the interaction
 		interaction.UID = user.ID
 		s.DB.Create(&interaction)
