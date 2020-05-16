@@ -21,29 +21,30 @@ func AddToCircle(s *common.Service) http.Handler {
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
-			http.Error(w, "Error retrieving current user: "+err.Error(), http.StatusBadRequest)
+			common.ThrowError(w, fmt.Errorf("Error retrieving current user: %v", err.Error()))
 			return
 		}
 		// Read the request body
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Error reading request body: "+err.Error(), http.StatusBadRequest)
+			common.ThrowError(w, fmt.Errorf("Error reading request body: %v", err.Error()))
 			return
 		}
 		// Unmarshal the circle
 		var circle models.Circle
 		if err := json.Unmarshal(body, &circle); err != nil {
-			http.Error(w, "Error unmarshalling circle: "+err.Error(), http.StatusBadRequest)
+			common.ThrowError(w, fmt.Errorf("Error unmarshalling circle: %v", err.Error()))
 			return
 		}
 
 		if circle.ID == "" {
-			http.Error(w, "bad request: 'id' parameter missing from request body", http.StatusBadRequest)
+			common.ThrowError(w, fmt.Errorf("bad request: 'id' parameter missing from request body"))
+			return
 		}
 
 		// Find circle
 		if err := s.DB.Table("circles").FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
-			http.Error(w, "Error retrieving/creating circle: "+err.Error(), http.StatusInternalServerError)
+			common.ThrowError(w, fmt.Errorf("Error retrieving/creating circle: %v", err.Error()))
 			return
 		}
 		fmt.Printf("circle: %+v\n", circle)

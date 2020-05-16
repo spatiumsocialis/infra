@@ -14,9 +14,4 @@ ENV EXECUTABLE=${EXECUTABLE}
 # Copy executable to /bin/
 COPY --from=builder /go/bin/${EXECUTABLE} /bin/${EXECUTABLE}
 
-# Set env defaults
-ENV DB_PROVIDER sqlite3
-ENV DB_CONNECTION_STRING :memory:
-ENV PORT 8080
-
 ENTRYPOINT /bin/${EXECUTABLE}

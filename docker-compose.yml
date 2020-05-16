@@ -130,6 +130,12 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.location-app.rule=PathPrefix(`/location`)"
       - "traefik.http.routers.location-app.entrypoints=web"
+  db:
+    image: postgres:latest
+    environment: 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
   start_dependencies:
       image: dadarek/wait-for-dependencies
       depends_on:

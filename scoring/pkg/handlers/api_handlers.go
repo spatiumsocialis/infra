@@ -71,22 +71,23 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 		period := vars[config.PeriodParameterString]
 		var eventScores []models.EventScore
 
-		if period == "all" {
-			if err := s.DB.Where("uid = ? OR uid = ?", user.ID, config.AllUserID).Find(&eventScores).Error; err != nil {
+		switch period {
+		case "all":
+			if err := s.DB.Find(&eventScores).Error; err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-		} else if period == "2week" {
+		case "2week":
 			eventScores, err = models.GetEventsInRollingWindow(s.DB, user, time.Now())
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-		} else if period == "day" {
+		case "day":
 			eventScores, err = models.GetEventsOnDay(s.DB, user, time.Now())
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-		} else {
+		default:
 			err := fmt.Errorf("Error: '%s' is not a valid period", period)
 			log.Println(err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)

@@ -10,11 +10,6 @@ import (
 	"github.com/safe-distance/socium-infra/location/pkg/models"
 )
 
-func throwError(w http.ResponseWriter, err error) {
-	log.Println(err)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
-}
-
 // AddPing handles requests for adding new pings
 func AddPing(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,11 +37,11 @@ func GetPings(s *common.Service) http.Handler {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		var pings []models.Ping
 		if err := s.DB.Find(&pings).Error; err != nil {
-			throwError(w, fmt.Errorf("error finding pings: %v", err))
+			common.ThrowError(w, fmt.Errorf("error finding pings: %v", err))
 
 		}
 		if err := json.NewEncoder(w).Encode(&pings); err != nil {
-			throwError(w, fmt.Errorf("error encoding pings: %v", err))
+			common.ThrowError(w, fmt.Errorf("error encoding pings: %v", err))
 
 		}
 	})
