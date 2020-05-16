@@ -38,7 +38,7 @@ func handleInteractionAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 	log.Printf("umarshalled interaction: %+v\n", i)
 
 	// Create new event score
-	models.CreateEventScore(s.DB, i.UID, i.ID, models.ProximityInteraction, time.Now(), config.ProximityInteractionPoints)
+	models.CreateEventScore(s.DB, i.UID, i.ID, models.ProximityInteraction, i.Timestamp, config.ProximityInteractionPoints)
 
 	// TODO: Produce message for proximity service to consume
 

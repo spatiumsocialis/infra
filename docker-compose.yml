@@ -48,6 +48,9 @@ services:
         SERVICE: circle
         EXECUTABLE: app
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       KAFKA_PEERS: kafka:9092
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
@@ -65,6 +68,9 @@ services:
         SERVICE: proximity
         EXECUTABLE: app
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       KAFKA_PEERS: kafka:9092
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
@@ -82,6 +88,9 @@ services:
         SERVICE: proximity
         EXECUTABLE: consumer
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       KAFKA_PEERS: kafka:9092
       KAFKA_CGROUP: proximity
     depends_on: 
@@ -93,6 +102,9 @@ services:
         SERVICE: scoring
         EXECUTABLE: app
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       KAFKA_PEERS: kafka:9092
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
@@ -110,6 +122,9 @@ services:
         SERVICE: scoring
         EXECUTABLE: consumer
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       KAFKA_PEERS: kafka:9092
       KAFKA_CGROUP: scoring
     depends_on: 
@@ -121,6 +136,9 @@ services:
         SERVICE: location
         EXECUTABLE: app
     environment: 
+      DB_PROVIDER: $DB_PROVIDER
+      DB_CONNECTION_STRING: $DB_CONNECTION_STRING
+      PORT: $PORT
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
     expose:
       - $PORT

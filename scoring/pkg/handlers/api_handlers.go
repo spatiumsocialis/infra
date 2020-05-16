@@ -73,7 +73,7 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 
 		switch period {
 		case "all":
-			if err := s.DB.Find(&eventScores).Error; err != nil {
+			if err := s.DB.Where("uid = ? OR uid = ?", user.ID, config.AllUserID).Find(&eventScores).Error; err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
