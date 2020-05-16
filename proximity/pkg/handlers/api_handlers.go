@@ -30,7 +30,9 @@ func AddInteraction(s *common.Service) http.Handler {
 		var otherUser auth.User
 		s.DB.First(&otherUser, auth.User{ID: otherUserUID})
 		if otherUser.CircleID != "" && otherUser.CircleID == user.CircleID {
-			w.Write([]byte("Users in same circle"))
+			response := make(map[string]string)
+			response["error"] = "users in same circle"
+			json.NewEncoder(w).Encode(response)
 			return
 		}
 		// Add the user's UID from the auth token to the interaction

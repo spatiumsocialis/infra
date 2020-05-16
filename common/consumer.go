@@ -164,7 +164,7 @@ func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, clai
 	for message := range claim.Messages() {
 		log.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(message.Value), message.Timestamp, message.Topic)
 		if err := consumer.Handle(message); err != nil {
-			log.Printf("Message handler error: %+v\n", message)
+			log.Printf("Message handler error: %+v\n", err)
 		}
 		session.MarkMessage(message, "")
 	}

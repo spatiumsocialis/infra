@@ -15,7 +15,6 @@ PORT=8080
 GOOGLE_API_KEY="your google api key"
 GOOGLE_APPLICATION_CREDENTIALS=path/to/google/service/account.json
 ```
-4. From the project root, run `chmod +x *.sh` to enable execution on the scripts
 ### Build
 Run `make build` to build the services
 ### Start

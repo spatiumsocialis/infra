@@ -112,14 +112,14 @@ func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Tim
 
 // GetEventsInRollingWindow returns the events that occured in the rolling window preceding date
 func GetEventsInRollingWindow(db *gorm.DB, user auth.User, date time.Time) []EventScore {
-	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, nil).AddDate(0, 0, 1)
+	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	start := end.AddDate(0, 0, -config.RollingWindowDays)
 	return getEventsInRange(db, user, start, end)
 }
 
 // GetEventsOnDay returns the events that occured on the given date
 func GetEventsOnDay(db *gorm.DB, user auth.User, date time.Time) []EventScore {
-	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, nil)
+	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
 	end := start.AddDate(0, 0, 1)
 	return getEventsInRange(db, user, start, end)
 }
