@@ -31,5 +31,5 @@ COPY . .
 # Set git config so go get uses ssh instead of https
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
-# # Download and install imports
-RUN go get -v ./...
+# # # Download and install imports
+# RUN go get -v ./...

@@ -14,23 +14,6 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: deps test build
 # TODO: Clean this mess up
-build-circle-app:
-	$(GOBUILD) -o ./circle/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./circle/$(BUILD_DIR_APP)
-build-proximity-app:
-	$(GOBUILD) -o ./proximity/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./proximity/$(BUILD_DIR_APP)
-build-scoring-app:
-	$(GOBUILD) -o ./scoring/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./scoring/$(BUILD_DIR_APP)
-build-location-app:
-	$(GOBUILD) -o ./location/$(BUILD_DIR_APP)/${BINARY_NAME_APP} -v ./location/$(BUILD_DIR_APP)
-build-apps: build-circle-app build-proximity-app build-scoring-app
-build-circle-consumer:
-	$(GOBUILD) -o ./circle/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./circle/$(BUILD_DIR_CONSUMER)
-build-proximity-consumer:
-	$(GOBUILD) -o ./proximity/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./proximity/$(BUILD_DIR_CONSUMER)
-build-scoring-consumer:
-	$(GOBUILD) -o ./scoring/$(BUILD_DIR_CONSUMER)/${BINARY_NAME_CONSUMER} -v ./scoring/$(BUILD_DIR_CONSUMER)
-build-consumers: build-circle-consumer build-proximity-consumer build-scoring-consumer
-build-all-bins: build-apps build-consumers
 test: 
 	$(GOTEST) -v ./$(PACKAGE)... $(ARGS)
 .PHONY: test
@@ -47,15 +30,14 @@ clean: clean-circle clean-proximity clean-scoring
 run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 deps:
-	$(GOGET) mod download
+	docker build -t deps -f ./deps.Dockerfile .
 start:
 	docker-compose run --rm start_dependencies
 	docker-compose up -d
 	@echo Services up and running!
 	@echo Traefik dashboard available at ${DOCKERHOST}:8080
 	@echo Services available at ${DOCKERHOST}:80
-build:
-	docker build -t dep -f ./dep.Dockerfile .
+build: deps
 	docker-compose build
 	@echo Services built!
 stop:

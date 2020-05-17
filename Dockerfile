@@ -1,5 +1,5 @@
 ARG EXECUTABLE
-FROM dep AS builder
+FROM deps AS builder
 ARG SERVICE
 ARG EXECUTABLE
 
