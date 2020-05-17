@@ -9,6 +9,7 @@ require (
 	firebase.google.com/go v3.12.1+incompatible
 	github.com/Shopify/sarama v1.26.3
 	github.com/golang/protobuf v1.4.1 // indirect
+	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/jinzhu/gorm v1.9.12
 	github.com/joho/godotenv v1.3.0

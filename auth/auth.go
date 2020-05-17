@@ -112,8 +112,8 @@ func Middleware(next http.Handler) http.Handler {
 
 // User is just a gorm model wrapper for the Firebase UID to support circle queries
 type User struct {
-	ID        string
-	CircleID  string
+	ID        string     `json:"id"`
+	CircleID  string     `json:"circleId"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-"`

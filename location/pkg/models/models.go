@@ -16,11 +16,11 @@ var Schema = common.Schema{
 type Ping struct {
 	gorm.Model `json:"-"`
 	// Firebase UID of the user
-	Lat float64
+	Lat float64 `json:"lat"`
 	// Duration of the interaction in nanoseconds
-	Lon float64
+	Lon float64 `json:"lon"`
 	// Timestamp of the beginning of the interaction
-	Timestamp time.Time
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // PingCluster represents a cluster of location pings

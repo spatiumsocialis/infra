@@ -38,12 +38,12 @@ func (e EventType) String() string {
 
 // EventScore represents the scoring of an event
 type EventScore struct {
-	gorm.Model
-	UID       string
-	EventID   uint
-	EventType EventType
-	Timestamp time.Time
-	Score     int
+	gorm.Model `json:"-"`
+	UID        string    `json:"uid"`
+	EventID    uint      `json:"eventId"`
+	EventType  EventType `json:"eventType"`
+	Timestamp  time.Time `json:"timestamp"`
+	Score      int       `json:"score"`
 }
 
 type eventScoreResponse struct {

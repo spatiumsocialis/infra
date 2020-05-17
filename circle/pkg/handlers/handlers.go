@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/safe-distance/socium-infra/auth"
-	"github.com/safe-distance/socium-infra/circle/config"
 	"github.com/safe-distance/socium-infra/circle/pkg/models"
 	"github.com/safe-distance/socium-infra/common"
 )
@@ -42,31 +42,17 @@ func AddToCircle(s *common.Service) http.Handler {
 			return
 		}
 
-		// Find circle
-		if err := s.DB.Table("circles").FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
-			common.ThrowError(w, fmt.Errorf("Error retrieving/creating circle: %v", err.Error()), http.StatusInternalServerError)
+		circle, err = models.AddUserToCircle(s, user.ID, circle.ID)
+		if err != nil {
+			common.ThrowError(w, fmt.Errorf("error adding user to circle: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("circle: %+v\n", circle)
-		// Start association mode
-		association := s.DB.Model(&circle).Association("Users")
-		if association.Error != nil {
-			common.ThrowError(w, fmt.Errorf("Error entering association mode: %v", association.Error.Error()), http.StatusInternalServerError)
-			return
-		}
-
-		// Add the user to the group
-		association.Append(&user)
-		s.DB.Save(&user)
 
 		payload, err := json.Marshal(circle)
 		if err != nil {
 			common.ThrowError(w, fmt.Errorf("Error marshalling circle: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
-
-		// Log updated user
-		common.LogObject(s.Producer, user.ID, user, config.ProductionTopic)
 
 		// Write the user back to the response
 		w.Write(payload)
@@ -97,6 +83,10 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 		// Unmarshal the JSON
 		var bodyJSON map[string]*json.RawMessage
 		json.Unmarshal(body, &bodyJSON)
+		if bodyJSON["uid"] == nil {
+			common.ThrowError(w, fmt.Errorf("no uid supplied"), http.StatusBadRequest)
+			return
+		}
 		var removeUserID string
 		json.Unmarshal(*(bodyJSON["uid"]), &removeUserID)
 
@@ -125,9 +115,10 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 
 		// Remove the user from the group
 		association.Delete(&userToRemove)
-
-		// Retrieve the updated circle
-		s.DB.Preload("Users").Find(&circle, models.Circle{ID: user.CircleID})
+		circle, err = models.AddUserToCircle(s, user.ID, uuid.New().String())
+		// save changes to user to circle
+		s.DB.Find(&user)
+		fmt.Printf("user: %+v circle: %+v\n", user, circle)
 
 		payload, err := json.Marshal(circle)
 		if err != nil {
@@ -148,15 +139,22 @@ func GetCircle(s *common.Service) http.Handler {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if user.CircleID == "" {
-			common.ThrowError(w, fmt.Errorf("user isn't in a circle"), http.StatusNotFound)
-			return
-		}
-		// Fetch the current user's circle
 		var circle models.Circle
-		if err := s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID}).Error; err != nil {
-			http.Error(w, "error fetching circle: "+err.Error(), http.StatusInternalServerError)
-			return
+		if user.CircleID == "" {
+			// Generate a new circle id
+			circleID := uuid.New().String()
+			circle, err = models.AddUserToCircle(s, user.ID, circleID)
+			if err != nil {
+				common.ThrowError(w, fmt.Errorf("error adding user to circle: %v", err.Error()), http.StatusInternalServerError)
+				return
+			}
+
+		} else {
+			// Fetch the current user's circle
+			if err := s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID}).Error; err != nil {
+				http.Error(w, "error fetching circle: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 		// Marshal the circle to JSON
 		payload, err := json.Marshal(circle)

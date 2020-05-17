@@ -18,13 +18,13 @@ var Schema = common.Schema{
 type Interaction struct {
 	gorm.Model
 	// Firebase UID of the user
-	UID string
+	UID string `json:"uid"`
 	// Average distance between the user and the other party in centimeters
-	Distance float32
+	Distance float32 `json:"distance"`
 	// Duration of the interaction in nanoseconds
-	Duration time.Duration
+	Duration time.Duration `json:"duration"`
 	// Timestamp of the beginning of the interaction
-	Timestamp time.Time
+	Timestamp time.Time `json:"timestamp"`
 	// Score for the interaction
-	Score float32
+	Score float32 `json:"score"`
 }
