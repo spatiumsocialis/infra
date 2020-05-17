@@ -6,7 +6,7 @@ import (
 )
 
 // ThrowError logs an error and writes it to the response
-func ThrowError(w http.ResponseWriter, err error) {
+func ThrowError(w http.ResponseWriter, err error, code int) {
 	log.Println(err)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	http.Error(w, err.Error(), code)
 }

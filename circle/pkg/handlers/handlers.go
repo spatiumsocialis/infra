@@ -21,37 +21,38 @@ func AddToCircle(s *common.Service) http.Handler {
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
-			common.ThrowError(w, fmt.Errorf("Error retrieving current user: %v", err.Error()))
+			common.ThrowError(w, fmt.Errorf("Error retrieving current user: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		// Read the request body
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			common.ThrowError(w, fmt.Errorf("Error reading request body: %v", err.Error()))
+			common.ThrowError(w, fmt.Errorf("Error reading request body: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		// Unmarshal the circle
 		var circle models.Circle
 		if err := json.Unmarshal(body, &circle); err != nil {
-			common.ThrowError(w, fmt.Errorf("Error unmarshalling circle: %v", err.Error()))
+			common.ThrowError(w, fmt.Errorf("Error unmarshalling circle: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
 
 		if circle.ID == "" {
-			common.ThrowError(w, fmt.Errorf("bad request: 'id' parameter missing from request body"))
+			common.ThrowError(w, fmt.Errorf("bad request: 'id' parameter missing from request body"), http.StatusBadRequest)
 			return
 		}
 
 		// Find circle
 		if err := s.DB.Table("circles").FirstOrCreate(&circle, models.Circle{ID: circle.ID}).Error; err != nil {
-			common.ThrowError(w, fmt.Errorf("Error retrieving/creating circle: %v", err.Error()))
+			common.ThrowError(w, fmt.Errorf("Error retrieving/creating circle: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
 		fmt.Printf("circle: %+v\n", circle)
 		// Start association mode
 		association := s.DB.Model(&circle).Association("Users")
 		if association.Error != nil {
-			log.Fatalf("Error entering association mode: %v", association.Error.Error())
+			common.ThrowError(w, fmt.Errorf("Error entering association mode: %v", association.Error.Error()), http.StatusInternalServerError)
+			return
 		}
 
 		// Add the user to the group
@@ -60,7 +61,8 @@ func AddToCircle(s *common.Service) http.Handler {
 
 		payload, err := json.Marshal(circle)
 		if err != nil {
-			log.Fatalf("Error marshalling circle: %v", err.Error())
+			common.ThrowError(w, fmt.Errorf("Error marshalling circle: %v", err.Error()), http.StatusInternalServerError)
+			return
 		}
 
 		// Log updated user
@@ -144,6 +146,10 @@ func GetCircle(s *common.Service) http.Handler {
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if user.CircleID == "" {
+			common.ThrowError(w, fmt.Errorf("user isn't in a circle"), http.StatusNotFound)
 			return
 		}
 		// Fetch the current user's circle

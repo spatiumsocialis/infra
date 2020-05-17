@@ -10,6 +10,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
     ports:
       # The HTTP port
       - "80:80"
@@ -158,7 +159,8 @@ services:
       image: dadarek/wait-for-dependencies
       depends_on:
         - kafka
-      command: kafka:9092
+        - db
+      command: kafka:9092 db:5432
 secrets:
   google_application_credentials:
     file: $GOOGLE_APPLICATION_CREDENTIALS
