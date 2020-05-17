@@ -1,6 +1,6 @@
 version: '3.4'
 services:
-  reverse-proxy:
+  reverse_proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.2
     # Enables the web UI and tells Traefik to listen to docker
@@ -42,7 +42,7 @@ services:
       - zookeeper
     extra_hosts:
       - "dockerhost:$DOCKERHOST"
-  circle-app:
+  circle_service:
     build: 
       context: .
       args: 
@@ -62,7 +62,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
       - "traefik.http.routers.circle_app.entrypoints=web"
-  proximity-app:
+  proximity_service:
     build: 
       context: .
       args: 
@@ -82,7 +82,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity`)"
       - "traefik.http.routers.proximity_app.entrypoints=web"
-  proximity-consumer:
+  proximity_consumer:
     build: 
       context: .
       args: 
@@ -96,7 +96,7 @@ services:
       KAFKA_CGROUP: proximity
     depends_on: 
       - kafka
-  scoring-app:
+  scoring_service:
     build:
       context: .
       args: 
@@ -116,7 +116,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.scoring_app.rule=PathPrefix(`/scores`)"
       - "traefik.http.routers.scoring_app.entrypoints=web"
-  scoring-consumer:
+  scoring_consumer:
     build: 
       context: .
       args: 
@@ -130,7 +130,7 @@ services:
       KAFKA_CGROUP: scoring
     depends_on: 
       - kafka
-  location-app:
+  location_service:
     build:
       context: .
       args:
