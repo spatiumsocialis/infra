@@ -33,13 +33,14 @@ deps:
 	docker build -t deps -f ./deps.Dockerfile .
 start:
 	docker-compose run --rm start_dependencies
-	docker-compose up -d
-	@echo Services up and running!
-	@echo Traefik dashboard available at ${DOCKERHOST}:8080
-	@echo Services available at ${DOCKERHOST}:80
+	docker-compose up -d ${service}
+	@echo "Service(s) up and running!"
+	@echo Traefik dashboard available at http://${DOCKERHOST}:8080
+	@echo Services available at http://${DOCKERHOST}:80
 build: deps
-	docker-compose build
-	@echo Services built!
+	docker-compose build ${service}
+	@echo "Service(s) built!"
+
 stop:
-	docker-compose down
+	docker-compose down ${service}
 	@echo Services torn down

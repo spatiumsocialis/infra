@@ -42,9 +42,10 @@ services:
       - zookeeper
     extra_hosts:
       - "dockerhost:$DOCKERHOST"
-  circle_service:
+  circle:
     build: 
       context: .
+      dockerfile: ./service.Dockerfile
       args: 
         SERVICE: circle
         EXECUTABLE: app
@@ -62,9 +63,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
       - "traefik.http.routers.circle_app.entrypoints=web"
-  proximity_service:
+  proximity:
     build: 
       context: .
+      dockerfile: ./service.Dockerfile
       args: 
         SERVICE: proximity
         EXECUTABLE: app
@@ -85,6 +87,7 @@ services:
   proximity_consumer:
     build: 
       context: .
+      dockerfile: ./service.Dockerfile
       args: 
         SERVICE: proximity
         EXECUTABLE: consumer
@@ -96,9 +99,10 @@ services:
       KAFKA_CGROUP: proximity
     depends_on: 
       - kafka
-  scoring_service:
+  scoring:
     build:
       context: .
+      dockerfile: ./service.Dockerfile
       args: 
         SERVICE: scoring
         EXECUTABLE: app
@@ -119,6 +123,7 @@ services:
   scoring_consumer:
     build: 
       context: .
+      dockerfile: ./service.Dockerfile
       args: 
         SERVICE: scoring
         EXECUTABLE: consumer
@@ -130,9 +135,10 @@ services:
       KAFKA_CGROUP: scoring
     depends_on: 
       - kafka
-  location_service:
+  location:
     build:
       context: .
+      dockerfile: ./service.Dockerfile
       args:
         SERVICE: location
         EXECUTABLE: app
