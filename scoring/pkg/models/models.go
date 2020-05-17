@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -45,6 +46,9 @@ type (
 		Timestamp time.Time `json:"timestamp"`
 		Score     int       `json:"score"`
 	}
+
+	// Period represents a period in time
+	Period string
 )
 
 const (
@@ -52,6 +56,11 @@ const (
 	ProximityInteraction EventType = iota
 	// DailyAllowance is the points users get once a day
 	DailyAllowance
+)
+
+const (
+	day           Period = "day"
+	rollingWindow Period = "2week"
 )
 
 var (
@@ -66,22 +75,6 @@ var (
 		DailyAllowance:       config.DailyAllowanceEventTypeString,
 	}
 )
-
-func (e EventType) String() string {
-	return eventTypeToString[e]
-}
-
-// MarshalJSON returns a marshalled EventScore
-func (e EventScore) MarshalJSON() ([]byte, error) {
-	r := eventScoreResponse{
-		UID:       e.UID,
-		EventID:   e.EventID,
-		EventType: e.EventType.String(),
-		Timestamp: e.Timestamp,
-		Score:     e.Score,
-	}
-	return json.Marshal(r)
-}
 
 // CreateEventScore creates a new EventScore object and writes it to the database before returning it
 func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType, timestamp time.Time, score int) (*EventScore, error) {
@@ -99,14 +92,61 @@ func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType
 	return &es, nil
 }
 
-func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
-	userScores := make([]UserScore, len(scores))
-	total := 0
-	for i, s := range scores {
-		userScores[i] = UserScore{UID: s.UID, Score: s.Score}
-		total += s.Score
+// GetEventsInPeriod returns the events that occured on the given date
+func GetEventsInPeriod(db *gorm.DB, user auth.User, date time.Time, period Period) ([]EventScore, error) {
+	start, end, err := startAndEndDates(period, date)
+	if err != nil {
+		return []EventScore{}, err
 	}
-	return CircleScore{CircleID: user.CircleID, Score: total, UserScores: userScores}
+	return getEventsInRange(db, user, start, end)
+}
+
+// GetCircleScoreForDate calculates a user's circle's scores for a two week rolling window ending on date
+func GetCircleScoreForDate(db *gorm.DB, user auth.User, date time.Time, period Period) (CircleScore, error) {
+	start, end, err := startAndEndDates(period, date)
+	if err != nil {
+		return CircleScore{}, err
+	}
+	return getCircleScoreForDates(user, start, end, db)
+}
+
+// Valid checks whether a period is valid
+func (p Period) Valid() bool {
+	if p == day || p == rollingWindow {
+		return true
+	}
+	return false
+}
+
+func (e EventType) String() string {
+	return eventTypeToString[e]
+}
+
+// MarshalJSON returns a marshalled EventScore
+func (e EventScore) MarshalJSON() ([]byte, error) {
+	r := eventScoreResponse{
+		UID:       e.UID,
+		EventID:   e.EventID,
+		EventType: e.EventType.String(),
+		Timestamp: e.Timestamp,
+		Score:     e.Score,
+	}
+	return json.Marshal(r)
+}
+
+func startAndEndDates(p Period, date time.Time) (start time.Time, end time.Time, err error) {
+	switch p {
+	case day:
+		start = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
+		end = start.AddDate(0, 0, 1)
+		return
+	case rollingWindow:
+		end = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
+		start = end.AddDate(0, 0, -config.RollingWindowDays)
+		return
+	default:
+		return time.Time{}, time.Time{}, fmt.Errorf("'%v' is not a valid period", p)
+	}
 }
 
 // GetEventsInRange returns all the user's events in the given date range
@@ -120,53 +160,48 @@ func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Tim
 	return eventScores, nil
 }
 
-// GetEventsInRollingWindow returns the events that occured in the rolling window preceding date
-func GetEventsInRollingWindow(db *gorm.DB, user auth.User, date time.Time) ([]EventScore, error) {
-	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
-	start := end.AddDate(0, 0, -config.RollingWindowDays)
-	return getEventsInRange(db, user, start, end)
-}
-
-// GetEventsOnDay returns the events that occured on the given date
-func GetEventsOnDay(db *gorm.DB, user auth.User, date time.Time) ([]EventScore, error) {
-	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
-	end := start.AddDate(0, 0, 1)
-	return getEventsInRange(db, user, start, end)
-}
-
-func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Time, db *gorm.DB) CircleScore {
-	scores := make([]EventScore, 0)
-	if user.CircleID != "" {
-		db.Table(
-			"scores",
-		).Select(
-			"scores.uid",
-			"users.circle_id",
-			"scores.value",
-		).Joins(
-			"left join users on users.id = scores.uid",
-		).Where(
-			"users.circle_id = ? AND timestamp BETWEEN ? AND ?",
-			user.CircleID,
-			startDate.Format(time.RFC3339),
-			endDate.Format(time.RFC3339),
-		).Find(&scores)
-	} else {
-		db.Where("timestamp BETWEEN ? AND ? AND uid = ?", startDate.Format(time.RFC3339), endDate.Format(time.RFC3339), user.ID).Find(&scores)
+func aggregateUserScores(user auth.User, scores []EventScore) CircleScore {
+	users := make(map[string]UserScore)
+	total := 0
+	for _, s := range scores {
+		u := users[s.UID]
+		if u.UID == "" {
+			u.UID = s.UID
+		}
+		u.Score += s.Score
+		users[s.UID] = u
+		total += s.Score
 	}
-	return calculateCircleScore(user, scores)
+	userScores := make([]UserScore, 0)
+	for _, user := range users {
+		userScores = append(userScores, user)
+	}
+	return CircleScore{CircleID: user.CircleID, Score: total, UserScores: userScores}
 }
 
-// GetDayCircleScoreForDate calculates a user's circle's scores for a certain date
-func GetDayCircleScoreForDate(user auth.User, date time.Time, db *gorm.DB) CircleScore {
-	start := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
-	end := start.AddDate(0, 0, 1)
-	return getCircleScoreForDates(user, start, end, db)
-}
+func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Time, db *gorm.DB) (CircleScore, error) {
 
-// GetRollingWindowCircleScoreForDate calculates a user's circle's scores for a two week rolling window ending on date
-func GetRollingWindowCircleScoreForDate(user auth.User, date time.Time, db *gorm.DB) CircleScore {
-	end := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
-	start := end.AddDate(0, 0, -config.RollingWindowDays)
-	return getCircleScoreForDates(user, start, end, db)
+	// Get all users in the circle
+	var users []auth.User
+	// If user's in a circle, get the rest of their circle
+	if user.CircleID != "" {
+		db.Find(&users, auth.User{CircleID: user.CircleID})
+	} else {
+		users = append(users, user)
+	}
+
+	uids := make([]string, len(users)+1)
+
+	for i, user := range users {
+		uids[i] = user.ID
+	}
+
+	uids[len(uids)-1] = config.AllUserID
+
+	var eventScores []EventScore
+	if err := db.Where("uid IN (?) AND timestamp BETWEEN ? AND ?", uids, startDate, endDate).Find(&eventScores).Error; err != nil {
+		return CircleScore{}, err
+	}
+
+	return aggregateUserScores(user, eventScores), nil
 }

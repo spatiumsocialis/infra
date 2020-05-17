@@ -4,7 +4,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -29,24 +28,20 @@ func GetCircleScoreForPeriod(s *common.Service) http.Handler {
 		vars := mux.Vars(r)
 
 		// Get period
-		period := vars[config.PeriodParameterString]
-		var circleScore models.CircleScore
+		period := models.Period(vars[config.PeriodParameterString])
 
-		if period == "" || period == "2week" {
-			circleScore = models.GetRollingWindowCircleScoreForDate(user, time.Now(), s.DB)
-		} else if period == "day" {
-			circleScore = models.GetDayCircleScoreForDate(user, time.Now(), s.DB)
-		} else {
-			err := fmt.Errorf("Error: '%s' is not a valid period", period)
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+		if !period.Valid() {
+			common.ThrowError(w, fmt.Errorf("error: '%s' is not a valid period", period), http.StatusBadRequest)
 		}
-
+		// Get circle score
+		circleScore, err := models.GetCircleScoreForDate(s.DB, user, time.Now(), period)
+		if err != nil {
+			common.ThrowError(w, err, http.StatusInternalServerError)
+		}
 		// Marshal payload
 		payload, err := json.Marshal(circleScore)
 		if err != nil {
-			log.Fatalf("Error marshalling circleScore: %v", err.Error())
+			common.ThrowError(w, fmt.Errorf("error marshalling circleScore: %v", err.Error()), http.StatusInternalServerError)
 		}
 
 		// Write to the response
@@ -61,43 +56,29 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 		// Get the current user
 		user, err := auth.GetUser(r, s.DB)
 		if err != nil {
-			http.Error(w, "Error retrieving current user: "+err.Error(), http.StatusBadRequest)
+			http.Error(w, "error retrieving current user: "+err.Error(), http.StatusBadRequest)
 			return
 		}
 		// Get request vars
 		vars := mux.Vars(r)
 
 		// Get period
-		period := vars[config.PeriodParameterString]
-		var eventScores []models.EventScore
+		period := models.Period(vars[config.PeriodParameterString])
 
-		switch period {
-		case "all":
-			if err := s.DB.Where("uid = ? OR uid = ?", user.ID, config.AllUserID).Find(&eventScores).Error; err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		case "2week":
-			eventScores, err = models.GetEventsInRollingWindow(s.DB, user, time.Now())
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		case "day":
-			eventScores, err = models.GetEventsOnDay(s.DB, user, time.Now())
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		default:
-			err := fmt.Errorf("Error: '%s' is not a valid period", period)
-			log.Println(err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+		if !period.Valid() {
+			common.ThrowError(w, fmt.Errorf("error: '%s' is not a valid period", period), http.StatusBadRequest)
+		}
+
+		// Get event scores
+		eventScores, err := models.GetEventsInPeriod(s.DB, user, time.Now(), period)
+		if err != nil {
+			common.ThrowError(w, err, http.StatusInternalServerError)
 		}
 
 		// Marshal payload
 		payload, err := json.Marshal(eventScores)
 		if err != nil {
-			log.Fatalf("Error marshalling eventScores: %v", err.Error())
+			common.ThrowError(w, fmt.Errorf("error marshalling eventScores: %v", err), http.StatusInternalServerError)
 		}
 
 		// Write to the response
