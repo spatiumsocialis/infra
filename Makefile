@@ -55,7 +55,7 @@ start:
 	@echo Traefik dashboard available at ${DOCKERHOST}:8080
 	@echo Services available at ${DOCKERHOST}:80
 build:
-	docker build -t dependencies -f ./dependencies.Dockerfile .
+	docker build -t dep -f ./dep.Dockerfile .
 	docker-compose build
 	@echo Services built!
 stop:

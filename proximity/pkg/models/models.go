@@ -3,7 +3,6 @@ package models
 import (
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/common"
 )
@@ -16,7 +15,7 @@ var Schema = common.Schema{
 
 // Interaction represents a proximity interaction event between a user and another person
 type Interaction struct {
-	gorm.Model
+	ID uint `gorm:"primary_key" json:"id"`
 	// Firebase UID of the user
 	UID string `json:"uid"`
 	// Average distance between the user and the other party in centimeters
@@ -26,5 +25,8 @@ type Interaction struct {
 	// Timestamp of the beginning of the interaction
 	Timestamp time.Time `json:"timestamp"`
 	// Score for the interaction
-	Score float32 `json:"score"`
+	Score     float32    `json:"score"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
+	DeletedAt *time.Time `sql:"index" json:"-"`
 }

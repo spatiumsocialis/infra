@@ -108,13 +108,21 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 		s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID})
 
 		// Start association mode
-		association := s.DB.Model(&circle).Association("Users")
-		if association.Error != nil {
-			log.Fatalf("Error entering association mode: %v", association.Error.Error())
+		users := s.DB.Model(&circle).Association("Users")
+		if users.Error != nil {
+			log.Fatalf("Error entering association mode: %v", users.Error)
 		}
 
 		// Remove the user from the group
-		association.Delete(&userToRemove)
+		users.Delete(&userToRemove)
+
+		// Check if circle  is empty
+		if users.Count() == 0 {
+			if err := circle.Delete(s); err != nil {
+				log.Printf("error deleting empty circle: %v", err)
+			}
+		}
+
 		// Add user to a new circle
 		newCircle := models.Circle{ID: uuid.New().String()}
 		err = models.AddUserToCircle(s, &user, &newCircle, false)

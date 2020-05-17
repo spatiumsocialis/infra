@@ -1,5 +1,5 @@
 ARG EXECUTABLE
-FROM dependencies AS builder
+FROM dep AS builder
 ARG SERVICE
 ARG EXECUTABLE
 

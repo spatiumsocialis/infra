@@ -49,3 +49,14 @@ func AddUserToCircle(s *common.Service, user *auth.User, circle *Circle, mergeCi
 	common.LogObject(s.Producer, user.ID, user, config.ProductionTopic)
 	return nil
 }
+
+// Delete deletes the circle from the service's data store
+func (c *Circle) Delete(s *common.Service) error {
+	if s.DB.NewRecord(c) {
+		return fmt.Errorf("no primary key")
+	}
+	if err := s.DB.Delete(c).Error; err != nil {
+		return fmt.Errorf("gorm: %v", err)
+	}
+	return nil
+}
