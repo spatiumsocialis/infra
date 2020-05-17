@@ -37,11 +37,11 @@ func GetPings(s *common.Service) http.Handler {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		var pings []models.Ping
 		if err := s.DB.Find(&pings).Error; err != nil {
-			common.ThrowError(w, fmt.Errorf("error finding pings: %v", err))
+			common.ThrowError(w, fmt.Errorf("error finding pings: %v", err), http.StatusInternalServerError)
 
 		}
 		if err := json.NewEncoder(w).Encode(&pings); err != nil {
-			common.ThrowError(w, fmt.Errorf("error encoding pings: %v", err))
+			common.ThrowError(w, fmt.Errorf("error encoding pings: %v", err), http.StatusInternalServerError)
 
 		}
 	})
