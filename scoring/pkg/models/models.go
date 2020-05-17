@@ -11,14 +11,41 @@ import (
 	"github.com/safe-distance/socium-infra/scoring/config"
 )
 
-// Schema holds the models to be included in the db schema
-var Schema = common.Schema{
-	&EventScore{},
-	&auth.User{},
-}
+type (
+	// UserScore is a mapping between a user and their score
+	UserScore struct {
+		UID   string `json:"uid"`
+		Score int    `json:"score"`
+	}
 
-// EventType is an enum type for representing the different types of scored events, such as proximity interactions and daily rewards
-type EventType uint
+	// CircleScore represents the total and individual scores for a circle
+	CircleScore struct {
+		CircleID   string      `json:"circleId"`
+		Score      int         `json:"score"`
+		UserScores []UserScore `json:"userScores"`
+	}
+
+	// EventType is an enum type for representing the different types of scored events, such as proximity interactions and daily rewards
+	EventType uint
+
+	// EventScore represents the scoring of an event
+	EventScore struct {
+		gorm.Model `json:"-"`
+		UID        string
+		EventID    uint
+		EventType  EventType
+		Timestamp  time.Time
+		Score      int
+	}
+
+	eventScoreResponse struct {
+		UID       string    `json:"uid"`
+		EventID   uint      `json:"eventId"`
+		EventType string    `json:"eventType"`
+		Timestamp time.Time `json:"timestamp"`
+		Score     int       `json:"score"`
+	}
+)
 
 const (
 	// ProximityInteraction is the type for proximity interaction events
@@ -27,31 +54,21 @@ const (
 	DailyAllowance
 )
 
-var eventTypeToString = map[EventType]string{
-	ProximityInteraction: config.ProximityInteractionEventTypeString,
-	DailyAllowance:       config.DailyAllowanceEventTypeString,
-}
+var (
+	// Schema holds the models to be included in the db schema
+	Schema = common.Schema{
+		&EventScore{},
+		&auth.User{},
+	}
+
+	eventTypeToString = map[EventType]string{
+		ProximityInteraction: config.ProximityInteractionEventTypeString,
+		DailyAllowance:       config.DailyAllowanceEventTypeString,
+	}
+)
 
 func (e EventType) String() string {
 	return eventTypeToString[e]
-}
-
-// EventScore represents the scoring of an event
-type EventScore struct {
-	gorm.Model `json:"-"`
-	UID        string    `json:"uid"`
-	EventID    uint      `json:"eventId"`
-	EventType  EventType `json:"eventType"`
-	Timestamp  time.Time `json:"timestamp"`
-	Score      int       `json:"score"`
-}
-
-type eventScoreResponse struct {
-	UID       string
-	EventID   uint
-	EventType string
-	Timestamp time.Time
-	Score     int
 }
 
 // MarshalJSON returns a marshalled EventScore
@@ -80,19 +97,6 @@ func CreateEventScore(db *gorm.DB, uid string, eventID uint, eventType EventType
 	}
 	log.Printf("event score created: %+v\n", es)
 	return &es, nil
-}
-
-// UserScore is a mapping between a user and their score
-type UserScore struct {
-	UID   string
-	Score int
-}
-
-// CircleScore represents the total and individual scores for a circle
-type CircleScore struct {
-	CircleID   string
-	Score      int
-	UserScores []UserScore
 }
 
 func calculateCircleScore(user auth.User, scores []EventScore) CircleScore {
