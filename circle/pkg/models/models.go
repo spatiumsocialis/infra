@@ -27,19 +27,26 @@ type Circle struct {
 // AddUserToCircle adds a user to a circle
 func AddUserToCircle(s *common.Service, user *auth.User, circle *Circle, mergeCircles bool) error {
 	// Find circle
-	if err := s.DB.FirstOrCreate(circle, Circle{ID: circle.ID}).Error; err != nil {
-		return fmt.Errorf("Error retrieving/creating circle: %v", err.Error())
+	if err := s.DB.Preload("Users").FirstOrCreate(circle, Circle{ID: circle.ID}).Error; err != nil {
+		return fmt.Errorf("error retrieving/creating circle: %v", err.Error())
 	}
 	fmt.Printf("circle: %+v\n", circle)
 	oldCircleID := user.CircleID
 	// Start association mode
 	association := s.DB.Model(circle).Association("Users")
 	if association.Error != nil {
-		return fmt.Errorf("Error entering association mode: %v", association.Error.Error())
+		return fmt.Errorf("error entering association mode: %v", association.Error.Error())
 	}
-	// Add the user to the group
+	for _, u := range circle.Users {
+		if u.ID == user.ID {
+			fmt.Println("user already in circle, no update")
+			return nil
+		}
+	}
+	// Add the user to the circle
 	association.Append(user)
-	s.DB.Save(&user)
+	s.DB.Save(user)
+	s.DB.Save(circle)
 	if mergeCircles && oldCircleID != "" {
 		var users []auth.User
 		s.DB.Find(&users, auth.User{CircleID: oldCircleID})

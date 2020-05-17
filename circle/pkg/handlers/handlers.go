@@ -158,13 +158,10 @@ func GetCircle(s *common.Service) http.Handler {
 				common.ThrowError(w, fmt.Errorf("error adding user to circle: %v", err.Error()), http.StatusInternalServerError)
 				return
 			}
-
-		} else {
 			// Fetch the current user's circle
-			if err := s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID}).Error; err != nil {
-				http.Error(w, "error fetching circle: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
+		} else if err := s.DB.Preload("Users").First(&circle, models.Circle{ID: user.CircleID}).Error; err != nil {
+			common.ThrowError(w, fmt.Errorf("error fetching circle: %v", err), http.StatusInternalServerError)
+			return
 		}
 		// Marshal the circle to JSON
 		payload, err := json.Marshal(circle)

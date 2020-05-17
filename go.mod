@@ -13,7 +13,6 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.10.5 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
-	github.com/mitchellh/mapstructure v1.3.0
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/smira/go-point-clustering v1.0.1
