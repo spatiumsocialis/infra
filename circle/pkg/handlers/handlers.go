@@ -42,7 +42,7 @@ func AddToCircle(s *common.Service) http.Handler {
 			return
 		}
 
-		circle, err = models.AddUserToCircle(s, user.ID, circle.ID)
+		err = models.AddUserToCircle(s, &user, &circle, true)
 		if err != nil {
 			common.ThrowError(w, fmt.Errorf("error adding user to circle: %v", err.Error()), http.StatusInternalServerError)
 			return
@@ -115,7 +115,9 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 
 		// Remove the user from the group
 		association.Delete(&userToRemove)
-		circle, err = models.AddUserToCircle(s, user.ID, uuid.New().String())
+		// Add user to a new circle
+		newCircle := models.Circle{ID: uuid.New().String()}
+		err = models.AddUserToCircle(s, &user, &newCircle, false)
 		// save changes to user to circle
 		s.DB.Find(&user)
 		fmt.Printf("user: %+v circle: %+v\n", user, circle)
@@ -142,8 +144,8 @@ func GetCircle(s *common.Service) http.Handler {
 		var circle models.Circle
 		if user.CircleID == "" {
 			// Generate a new circle id
-			circleID := uuid.New().String()
-			circle, err = models.AddUserToCircle(s, user.ID, circleID)
+			circle.ID = uuid.New().String()
+			err = models.AddUserToCircle(s, &user, &circle, false)
 			if err != nil {
 				common.ThrowError(w, fmt.Errorf("error adding user to circle: %v", err.Error()), http.StatusInternalServerError)
 				return
