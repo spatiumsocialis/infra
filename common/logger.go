@@ -1,8 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"time"
 )
 
@@ -12,6 +14,13 @@ func Logger(inner http.Handler, name string) http.Handler {
 		start := time.Now()
 
 		inner.ServeHTTP(w, r)
+
+		// Save a copy of this request for debugging.
+		requestDump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println(string(requestDump))
 
 		log.Printf(
 			"request: %s %s %s %s",
