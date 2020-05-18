@@ -38,7 +38,8 @@ start:
 	docker-compose run --rm start_dependencies
 	docker-compose up -d ${service}
 	@echo "Service(s) up and running!"
-	@echo Traefik dashboard available at http://${DOCKERHOST}:8080
+	@echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
+	@echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080
 	@echo Services available at http://${DOCKERHOST}:80
 build: deps
 	docker-compose build ${service}
