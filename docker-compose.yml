@@ -40,6 +40,9 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels: 
+      - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^(.*):80/traefik"
+      - "traefik.http.middlewares.test-redirectregex.redirectregex.replacement=$${1}:8080"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
@@ -65,12 +68,7 @@ services:
     extra_hosts:
       - "dockerhost:$DOCKERHOST"
   circle:
-    build: 
-      context: .
-      dockerfile: ./service.Dockerfile
-      args: 
-        SERVICE: circle
-        EXECUTABLE: app
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/circle:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING
@@ -86,12 +84,7 @@ services:
       - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
       - "traefik.http.routers.circle_app.entrypoints=web"
   proximity:
-    build: 
-      context: .
-      dockerfile: ./service.Dockerfile
-      args: 
-        SERVICE: proximity
-        EXECUTABLE: app
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/proximity:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING
@@ -107,12 +100,7 @@ services:
       - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity`)"
       - "traefik.http.routers.proximity_app.entrypoints=web"
   proximity_consumer:
-    build: 
-      context: .
-      dockerfile: ./service.Dockerfile
-      args: 
-        SERVICE: proximity
-        EXECUTABLE: consumer
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/proximity_consumer:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING
@@ -122,12 +110,7 @@ services:
     depends_on: 
       - kafka
   scoring:
-    build:
-      context: .
-      dockerfile: ./service.Dockerfile
-      args: 
-        SERVICE: scoring
-        EXECUTABLE: app
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/scoring:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING
@@ -143,12 +126,7 @@ services:
       - "traefik.http.routers.scoring_app.rule=PathPrefix(`/scores`)"
       - "traefik.http.routers.scoring_app.entrypoints=web"
   scoring_consumer:
-    build: 
-      context: .
-      dockerfile: ./service.Dockerfile
-      args: 
-        SERVICE: scoring
-        EXECUTABLE: consumer
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/scoring_consumer:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING
@@ -158,12 +136,7 @@ services:
     depends_on: 
       - kafka
   location:
-    build:
-      context: .
-      dockerfile: ./service.Dockerfile
-      args:
-        SERVICE: location
-        EXECUTABLE: app
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/location:latest
     environment: 
       DB_PROVIDER: $DB_PROVIDER
       DB_CONNECTION_STRING: $DB_CONNECTION_STRING

@@ -1,0 +1,44 @@
+version: '3'
+services:
+  circle:
+    build: 
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: circle
+        EXECUTABLE: app
+  proximity:
+    build: 
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: app
+  proximity_consumer:
+    build: 
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: consumer
+  scoring:
+    build:
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: app
+  scoring_consumer:
+    build: 
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: consumer
+  location:
+    build:
+      context: .
+      dockerfile: ./service.Dockerfile
+      args:
+        SERVICE: location
+        EXECUTABLE: app

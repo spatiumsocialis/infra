@@ -11,6 +11,8 @@ EXECUTABLES=app consumer
 BINARY_NAME_APP=app.out
 BINARY_NAME_CONSUMER=consumer.out
 BINARY_UNIX=$(BINARY_NAME)_unix
+GOOGLE_GCR_HOSTNAME=gcr.io
+GOOGLE_PROJECT_ID=spatiumsocialis
 
 all: deps test build
 # TODO: Clean this mess up
@@ -32,8 +34,12 @@ token:
 	@echo "Token has been copied to clipboard"
 run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
-deps:
-	docker build -t deps -f ./deps.Dockerfile .
+push-deps:
+	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
+push:
+	docker-compose push ${service}
+build-deps:
+	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ./deps.Dockerfile .
 start:
 	docker-compose run --rm start_dependencies
 	docker-compose up -d ${service}
@@ -41,8 +47,8 @@ start:
 	@echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
 	@echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080
 	@echo Services available at http://${DOCKERHOST}:80
-build: deps
-	docker-compose build ${service}
+build: build-deps
+	docker-compose -f docker-compose.yml -f docker-compose.build.yml build ${service}
 	@echo "Service(s) built!"
 
 stop:
