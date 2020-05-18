@@ -15,13 +15,29 @@ var Schema = common.Schema{
 	&auth.User{},
 }
 
-// Circle represents a group of users who aren't making any attempt to social distance from each other (eg families, partners)
-type Circle struct {
-	ID        string      `json:"id"`
-	Users     []auth.User `json:"users"`
-	CreatedAt time.Time   `json:"-"`
-	UpdatedAt time.Time   `json:"-"`
-	DeletedAt *time.Time  `json:"-" sql:"index"`
+type (
+	// Circle represents a group of users who aren't making any attempt to social distance from each other (eg families, partners)
+	Circle struct {
+		ID        string      `json:"id"`
+		Users     []auth.User `json:"users"`
+		CreatedAt time.Time   `json:"-"`
+		UpdatedAt time.Time   `json:"-"`
+		DeletedAt *time.Time  `json:"-" sql:"index"`
+	}
+	// CircleResponse represents a circle as it's returned to the client, with user profiles
+	CircleResponse struct {
+		ID    string         `json:"id"`
+		Users []auth.Profile `json:"users"`
+	}
+)
+
+// NewCircleResponse returns a new response circle from the given circle
+func NewCircleResponse(c Circle) (*CircleResponse, error) {
+	profiles, err := auth.GetUserProfiles(c.Users...)
+	if err != nil {
+		return nil, err
+	}
+	return &CircleResponse{ID: c.ID, Users: profiles}, nil
 }
 
 // AddUserToCircle adds a user to a circle

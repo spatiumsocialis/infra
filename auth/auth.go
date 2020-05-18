@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,39 +15,78 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// TestUID is the UID of a test user
-const TestUID = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
+type (
+	// contextKey represents keys into a request context
+	contextKey string
+	// Token is a proxy of the Firebase Auth SDKs token, so that importing packages won't need to import both auth packages
+	Token auth.Token
 
-const googleApplicationCredentialsKey = "GOOGLE_APPLICATION_CREDENTIALS"
+	// User is just a gorm model wrapper for the Firebase UID to support circle queries
+	User struct {
+		ID        string     `json:"id"`
+		CircleID  string     `json:"circleId"`
+		CreatedAt time.Time  `json:"-"`
+		UpdatedAt time.Time  `json:"-"`
+		DeletedAt *time.Time `json:"-"`
+	}
 
-type contextKey string
+	// Profile contains a user's profile information
+	Profile struct {
+		UID            string `json:"uid"`
+		Name           string `json:"name"`
+		ProfilePicture string `json:"profilePicture"`
+	}
+)
 
-// ContextKeyAuthToken is the key in context under which the auth token is stored in AuthenticateRequest
-const contextKeyAuthToken = contextKey("auth-token")
+const (
+	// TestUID is the UID of a test user
+	TestUID = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
 
-// Token is a proxy of the Firebase Auth SDKs token, so that importing packages won't need to import both auth packages
-type Token auth.Token
+	googleApplicationCredentialsKey = "GOOGLE_APPLICATION_CREDENTIALS"
+
+	// contextKeyAuthToken is the key in context under which the auth token is stored in AuthenticateRequest
+	contextKeyAuthToken = contextKey("auth-token")
+)
 
 var firebaseApp *firebase.App
 
-func initializeApp() {
-
-	if os.Getenv(googleApplicationCredentialsKey) == "" {
-		log.Fatalf("auth: %v environment variable not set. Ensure you set %v to the path"+
-			" to your service account JSON", googleApplicationCredentialsKey, googleApplicationCredentialsKey)
-	}
-	var err error
-	firebaseApp, err = firebase.NewApp(context.Background(), nil)
+// GetUser retrieves the UID from a request's token and returns the user model
+func GetUser(r *http.Request, db *gorm.DB) (User, error) {
+	// Retrieve the auth token from the request context
+	token, err := GetTokenFrom(r.Context())
 	if err != nil {
-		log.Fatalf("error initializing Firebase app: %v\n", err)
+		return User{}, err
 	}
+	// Retrieve the client UID from the token
+	currentUID := token.UID
+
+	// Fetch the current user
+	var user User
+	if result := db.FirstOrCreate(&user, User{ID: currentUID}); result.Error != nil {
+		return User{}, result.Error
+	}
+	return user, nil
 }
 
-func getFireBaseApp() *firebase.App {
-	if firebaseApp == nil {
-		initializeApp()
+// GetUserProfiles returns the users' profiles
+func GetUserProfiles(users ...User) ([]Profile, error) {
+	ctx := context.Background()
+	client, err := getFireBaseApp().Auth(ctx)
+	if err != nil {
+		return []Profile{}, fmt.Errorf("error getting firebase app: %v", err)
 	}
-	return firebaseApp
+	profiles := make([]Profile, len(users))
+	for i, u := range users {
+		p := Profile{UID: u.ID}
+		userRecord, err := client.GetUser(ctx, u.ID)
+		if err != nil {
+			return []Profile{}, fmt.Errorf("error getting user '%v': %v", u.ID, err)
+		}
+		p.Name = userRecord.DisplayName
+		p.ProfilePicture = userRecord.PhotoURL
+		profiles[i] = p
+	}
+	return profiles, nil
 }
 
 // GetTokenFrom retrieves the access token from a request context. It returns an error if the token isn't found
@@ -110,29 +150,22 @@ func Middleware(next http.Handler) http.Handler {
 	})
 }
 
-// User is just a gorm model wrapper for the Firebase UID to support circle queries
-type User struct {
-	ID        string     `json:"id"`
-	CircleID  string     `json:"circleId"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+func initializeApp() {
+
+	if os.Getenv(googleApplicationCredentialsKey) == "" {
+		log.Fatalf("auth: %v environment variable not set. Ensure you set %v to the path"+
+			" to your service account JSON", googleApplicationCredentialsKey, googleApplicationCredentialsKey)
+	}
+	var err error
+	firebaseApp, err = firebase.NewApp(context.Background(), nil)
+	if err != nil {
+		log.Fatalf("error initializing Firebase app: %v\n", err)
+	}
 }
 
-// GetUser retrieves the UID from a request's token and returns the user model
-func GetUser(r *http.Request, db *gorm.DB) (User, error) {
-	// Retrieve the auth token from the request context
-	token, err := GetTokenFrom(r.Context())
-	if err != nil {
-		return User{}, err
+func getFireBaseApp() *firebase.App {
+	if firebaseApp == nil {
+		initializeApp()
 	}
-	// Retrieve the client UID from the token
-	currentUID := token.UID
-
-	// Fetch the current user
-	var user User
-	if result := db.FirstOrCreate(&user, User{ID: currentUID}); result.Error != nil {
-		return User{}, result.Error
-	}
-	return user, nil
+	return firebaseApp
 }

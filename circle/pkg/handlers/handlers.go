@@ -48,9 +48,15 @@ func AddToCircle(s *common.Service) http.Handler {
 			return
 		}
 
-		payload, err := json.Marshal(circle)
+		circleResponse, err := models.NewCircleResponse(circle)
 		if err != nil {
-			common.ThrowError(w, fmt.Errorf("Error marshalling circle: %v", err.Error()), http.StatusInternalServerError)
+			common.ThrowError(w, fmt.Errorf("error creating circle response: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		payload, err := json.Marshal(circleResponse)
+		if err != nil {
+			common.ThrowError(w, fmt.Errorf("error marshalling circle: %v", err.Error()), http.StatusInternalServerError)
 			return
 		}
 
@@ -130,7 +136,13 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 		s.DB.Find(&user)
 		fmt.Printf("user: %+v circle: %+v\n", user, circle)
 
-		payload, err := json.Marshal(circle)
+		circleResponse, err := models.NewCircleResponse(circle)
+		if err != nil {
+			common.ThrowError(w, fmt.Errorf("error creating circle response: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		payload, err := json.Marshal(circleResponse)
 		if err != nil {
 			log.Fatalf("Error marshalling circle: %v", err.Error())
 		}
@@ -163,8 +175,13 @@ func GetCircle(s *common.Service) http.Handler {
 			common.ThrowError(w, fmt.Errorf("error fetching circle: %v", err), http.StatusInternalServerError)
 			return
 		}
-		// Marshal the circle to JSON
-		payload, err := json.Marshal(circle)
+		circleResponse, err := models.NewCircleResponse(circle)
+		if err != nil {
+			common.ThrowError(w, fmt.Errorf("error creating circle response: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		payload, err := json.Marshal(circleResponse)
 		if err != nil {
 			log.Fatalf("Error marshalling circle: %v", err.Error())
 		}
