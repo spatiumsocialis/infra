@@ -20,7 +20,7 @@ func Logger(inner http.Handler, name string) http.Handler {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(string(requestDump))
+		log.Println(string(requestDump))
 
 		log.Printf(
 			"request: %s %s %s %s",
