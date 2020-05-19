@@ -40,9 +40,9 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    labels: 
-      - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^(.*):80/traefik"
-      - "traefik.http.middlewares.test-redirectregex.redirectregex.replacement=$${1}:8080"
+    # labels: 
+    #   - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^(.*):80/traefik"
+    #   - "traefik.http.middlewares.test-redirectregex.redirectregex.replacement=$${1}:8080"
   zookeeper:
     image: wurstmeister/zookeeper
     ports:

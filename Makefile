@@ -38,7 +38,7 @@ push-deps:
 push:
 	docker-compose -f docker-compose.yml -f docker-compose.build.yml push ${service}
 pull:
-	docker-compose pull
+	docker-compose pull ${service}
 build-deps:
 	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ./deps.Dockerfile .
 start:
