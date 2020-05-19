@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/safe-distance/socium-infra/auth"
@@ -30,7 +29,7 @@ func handleInteractionAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 	return nil
 }
 
-// handleDailyPointsAddedMessage handles messages on the daily_points_added topic (serialized models.EventScore objects)
+// handleDailyPointsAddedMessage handles messages on the daily_allowance_awarded topic (serialized models.EventScore objects)
 func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage) error {
 	var ole common.ObjectLogEntry
 
@@ -50,7 +49,7 @@ func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 		return err
 	}
 
-	if _, err := models.CreateEventScore(s.DB, config.AllUserID, e.EventID, models.DailyAllowance, time.Now(), config.DailyAllowancePoints); err != nil {
+	if _, err := models.CreateEventScore(s.DB, e.UID, e.EventID, models.DailyAllowance, e.Timestamp, e.Score); err != nil {
 		return err
 	}
 	return nil
@@ -58,7 +57,7 @@ func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 
 // TopicHandlerMap maps topic names to the handlers which handle messages consumed from them
 var TopicHandlerMap = map[string]common.MessageHandler{
-	"interaction_added":  handleInteractionAddedMessage,
-	"daily_points_added": handleDailyPointsAddedMessage,
-	"user_modified":      common.SaveUpdatedUserMessageHandler,
+	"interaction_added":        handleInteractionAddedMessage,
+	config.DailyAllowanceTopic: handleDailyPointsAddedMessage,
+	"user_modified":            common.SaveUpdatedUserMessageHandler,
 }

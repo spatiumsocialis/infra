@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	common.RegisterKafkaClientFlags()
 	flag.Parse()
 	producer := common.NewNullAsyncProducer()
 	common.LoadEnv(false)

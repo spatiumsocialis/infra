@@ -54,7 +54,7 @@ services:
     expose: 
       - 9092
     environment:
-      KAFKA_CREATE_TOPICS: "interaction_added:1:1, user_modified:1:1, daily_points_added:1:1, interaction_scored:1:1"
+      KAFKA_CREATE_TOPICS: "interaction_added:1:1, user_modified:1:1, daily_allowance_awarded:1:1, interaction_scored:1:1"
       KAFKA_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LOG_DIRS: /kafka/logs
@@ -135,6 +135,12 @@ services:
       KAFKA_CGROUP: scoring
     depends_on: 
       - kafka
+  scoring_daily_allowance_awarder:
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/scoring_daily_allowance_awarder:latest
+    container_name: infra_scoring_daily_allowance_awarder
+    environment: 
+      KAFKA_PEERS: kafka:9092
+      SCHEDULE: 0 0 3 * * *
   location:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/location:latest
     environment: 

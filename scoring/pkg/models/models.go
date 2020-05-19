@@ -74,6 +74,10 @@ var (
 		ProximityInteraction: config.ProximityInteractionEventTypeString,
 		DailyAllowance:       config.DailyAllowanceEventTypeString,
 	}
+	stringToEventType = map[string]EventType{
+		config.ProximityInteractionEventTypeString: ProximityInteraction,
+		config.DailyAllowanceEventTypeString:       DailyAllowance,
+	}
 )
 
 // CreateEventScore creates a new EventScore object and writes it to the database before returning it
@@ -134,6 +138,22 @@ func (e EventScore) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r)
 }
 
+// UnmarshalJSON unmarshals the event score object
+func (e *EventScore) UnmarshalJSON(b []byte) error {
+	var r eventScoreResponse
+	if err := json.Unmarshal(b, &r); err != nil {
+		return err
+	}
+	*e = EventScore{
+		UID:       r.UID,
+		EventID:   r.EventID,
+		EventType: stringToEventType[r.EventType],
+		Timestamp: r.Timestamp,
+		Score:     r.Score,
+	}
+	return nil
+}
+
 func startAndEndDates(p Period, date time.Time) (start time.Time, end time.Time, err error) {
 	switch p {
 	case day:
@@ -152,7 +172,7 @@ func startAndEndDates(p Period, date time.Time) (start time.Time, end time.Time,
 // GetEventsInRange returns all the user's events in the given date range
 func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Time) ([]EventScore, error) {
 	var eventScores []EventScore
-	if err := db.Order("timestamp").Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start.Format(time.RFC3339), end.Format(time.RFC3339)).
+	if err := db.Order("timestamp desc").Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start.Format(time.RFC3339), end.Format(time.RFC3339)).
 		Find(&eventScores).
 		Error; err != nil {
 		return eventScores, err
@@ -164,13 +184,17 @@ func aggregateUserScores(user auth.User, scores []EventScore) CircleScore {
 	users := make(map[string]UserScore)
 	total := 0
 	for _, s := range scores {
+		total += s.Score
+		// If event is attributed to the "All" user, skip the user aggregation bit
+		if s.UID == config.AllUserID {
+			continue
+		}
 		u := users[s.UID]
 		if u.UID == "" {
 			u.UID = s.UID
 		}
 		u.Score += s.Score
 		users[s.UID] = u
-		total += s.Score
 	}
 	userScores := make([]UserScore, 0)
 	for _, user := range users {

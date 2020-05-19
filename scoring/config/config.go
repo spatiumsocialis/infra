@@ -29,6 +29,9 @@ const RollingWindowDays = 14
 // ProductionTopic is the Kafka topic this service produces to
 const ProductionTopic = "interaction_scored"
 
+// DailyAllowanceTopic is the Kafka topic which the daily points allowance is produced to
+const DailyAllowanceTopic = "daily_allowance_awarded"
+
 // Scores for events
 const (
 	ProximityInteractionPoints = -100

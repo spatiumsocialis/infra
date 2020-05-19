@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
+	github.com/robfig/cron v1.2.0 // indirect
 	github.com/smira/go-point-clustering v1.0.1
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect

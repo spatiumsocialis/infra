@@ -45,6 +45,15 @@ services:
         EXECUTABLE: consumer
         GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
         GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  scoring_daily_allowance_awarder:
+    build: 
+      context: .
+      dockerfile: ./service.Dockerfile
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: award_daily_points
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   location:
     build:
       context: .
