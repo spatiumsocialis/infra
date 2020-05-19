@@ -203,5 +203,21 @@ func getCircleScoreForDates(user auth.User, startDate time.Time, endDate time.Ti
 		return CircleScore{}, err
 	}
 
-	return aggregateUserScores(user, eventScores), nil
+	// Aggregate circle scores
+	circleScore := aggregateUserScores(user, eventScores)
+
+	// Add EventScores with score=0 for users with no events in period
+	for _, uid := range uids[:len(uids)-1] {
+		found := false
+		for _, userScore := range circleScore.UserScores {
+			if uid == userScore.UID {
+				found = true
+			}
+		}
+		if !found {
+			circleScore.UserScores = append(circleScore.UserScores, UserScore{UID: uid, Score: 0})
+		}
+	}
+
+	return circleScore, nil
 }
