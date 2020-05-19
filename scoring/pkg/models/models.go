@@ -152,7 +152,7 @@ func startAndEndDates(p Period, date time.Time) (start time.Time, end time.Time,
 // GetEventsInRange returns all the user's events in the given date range
 func getEventsInRange(db *gorm.DB, user auth.User, start time.Time, end time.Time) ([]EventScore, error) {
 	var eventScores []EventScore
-	if err := db.Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start.Format(time.RFC3339), end.Format(time.RFC3339)).
+	if err := db.Order("timestamp").Where("uid = ? OR uid = ? AND timestamp BETWEEN ? AND ?", user.ID, config.AllUserID, start.Format(time.RFC3339), end.Format(time.RFC3339)).
 		Find(&eventScores).
 		Error; err != nil {
 		return eventScores, err

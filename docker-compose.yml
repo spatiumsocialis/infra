@@ -155,7 +155,6 @@ services:
     environment: 
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-
   start_dependencies:
       image: dadarek/wait-for-dependencies
       depends_on:
