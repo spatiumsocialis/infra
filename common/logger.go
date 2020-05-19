@@ -21,7 +21,6 @@ func Logger(inner http.Handler, name string) http.Handler {
 			fmt.Println(err)
 		}
 		log.Println(string(requestDump))
-
 		log.Printf(
 			"request: %s %s %s %s",
 			r.Method,

@@ -30,14 +30,15 @@ clean-scoring:
 	rm -f ./scoring/$(BUILD_DIR)/${BINARY_NAME}
 clean: clean-circle clean-proximity clean-scoring
 token:
-	./auth/cmd/tokengen/tokengen.out | pbcopy
-	@echo "Token has been copied to clipboard"
+	./auth/cmd/tokengen/tokengen.out -u $(uid)
 run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 push-deps:
 	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
 push:
-	docker-compose push ${service}
+	docker-compose -f docker-compose.yml -f docker-compose.build.yml push ${service}
+pull:
+	docker-compose pull
 build-deps:
 	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ./deps.Dockerfile .
 start:

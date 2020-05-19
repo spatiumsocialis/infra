@@ -12,20 +12,20 @@ var Routes = common.Routes{
 	{
 		Name:           "AddToCircle",
 		Method:         strings.ToUpper("Patch"),
-		Pattern:        "/add",
+		Pattern:        "/circles/add",
 		ServiceHandler: handlers.AddToCircle,
 	},
 
 	{
 		Name:           "GetCircle",
 		Method:         strings.ToUpper("Get"),
-		Pattern:        "/",
+		Pattern:        "/circles",
 		ServiceHandler: handlers.GetCircle,
 	},
 	{
 		Name:           "RemoveFromCircle",
 		Method:         strings.ToUpper("Patch"),
-		Pattern:        "/remove",
+		Pattern:        "/circles/remove",
 		ServiceHandler: handlers.RemoveFromCircle,
 	},
 }

@@ -1,4 +1,4 @@
-FROM alpine:edge AS dep
+FROM alpine:edge AS deps
 RUN apk update
 RUN apk upgrade
 RUN apk add --update go gcc g++ openssh git

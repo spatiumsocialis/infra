@@ -7,6 +7,8 @@ services:
       args: 
         SERVICE: circle
         EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   proximity:
     build: 
       context: .
@@ -14,6 +16,8 @@ services:
       args: 
         SERVICE: proximity
         EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   proximity_consumer:
     build: 
       context: .
@@ -21,6 +25,8 @@ services:
       args: 
         SERVICE: proximity
         EXECUTABLE: consumer
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   scoring:
     build:
       context: .
@@ -28,6 +34,8 @@ services:
       args: 
         SERVICE: scoring
         EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   scoring_consumer:
     build: 
       context: .
@@ -35,6 +43,8 @@ services:
       args: 
         SERVICE: scoring
         EXECUTABLE: consumer
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
   location:
     build:
       context: .
@@ -42,3 +52,5 @@ services:
       args:
         SERVICE: location
         EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
