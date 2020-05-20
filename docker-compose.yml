@@ -153,7 +153,7 @@ services:
     container_name: infra_scoring_daily_allowance_awarder
     environment: 
       KAFKA_PEERS: kafka:9092
-      SCHEDULE: 0 0 3 * * *
+      SCHEDULE: 0 0 2 * * *
   location:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/location:latest
     environment: 
