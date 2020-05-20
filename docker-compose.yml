@@ -26,19 +26,29 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.watch=true"
-      - "--providers.docker.exposedbydefault=true"
+      - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--accesslog=true"
+      # tracing
       - "--tracing.jaeger=true"
       - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
       - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
       - "--tracing.jaeger.samplingType=const"
+      # TLS
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.email=matt@axial.technology"
+      - "--certificatesresolvers.myersolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
     ports:
+      # The HTTPS port
+      - "443:443"
       # The HTTP port
       - "80:80"
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
+      - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     # labels: 
     #   - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^(.*):80/traefik"
@@ -66,7 +76,7 @@ services:
     depends_on:
       - zookeeper
     extra_hosts:
-      - "dockerhost:$DOCKERHOST"
+      - "dockerhost:${DOCKERHOST}"
   circle:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/circle:latest
     environment: 
@@ -81,8 +91,9 @@ services:
       - google_application_credentials
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
-      - "traefik.http.routers.circle_app.entrypoints=web"
+      - "traefik.http.routers.circle_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/circle`)"
+      - "traefik.http.routers.circle_app.entrypoints=websecure"
+      - "traefik.http.routers.circle_app.tls.certresolver=myresolver"
   proximity:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/proximity:latest
     environment: 
