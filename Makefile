@@ -43,7 +43,7 @@ build-deps:
 	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ./deps.Dockerfile .
 start:
 	docker-compose run --rm start_dependencies
-	docker-compose up -d ${service}
+	docker-compose -f docker-compose.yml -f docker-compose.${env}.yml up -d ${service}
 	@echo "Service(s) up and running!"
 	@echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
 	@echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080

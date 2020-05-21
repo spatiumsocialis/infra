@@ -34,12 +34,6 @@ services:
       - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
       - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
       - "--tracing.jaeger.samplingType=const"
-      # TLS
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.myresolver.acme.email=matt@axial.technology"
-      - "--certificatesresolvers.myersolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
     ports:
       # The HTTPS port
       - "443:443"
@@ -48,7 +42,7 @@ services:
       # The Web UI (enabled by --api.insecure=true)
       - "8080:8080"
     volumes:
-      - "./letsencrypt:/letsencrypt"
+      - "./secrets/letsencrypt:/secrets/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     # labels: 
     #   - "traefik.http.middlewares.test-redirectregex.redirectregex.regex=^(.*):80/traefik"
@@ -89,11 +83,6 @@ services:
       - $PORT
     secrets:
       - google_application_credentials
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.circle_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/circle`)"
-      - "traefik.http.routers.circle_app.entrypoints=websecure"
-      - "traefik.http.routers.circle_app.tls.certresolver=myresolver"
   proximity:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/proximity:latest
     environment: 
@@ -106,11 +95,6 @@ services:
       - $PORT
     secrets:
       - google_application_credentials
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.proximity_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/proximity`)"
-      - "traefik.http.routers.proximity_app.entrypoints=websecure"
-      - "traefik.http.routers.proximity_app.tls.certresolver=myresolver"
   proximity_consumer:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/proximity_consumer:latest
     environment: 
@@ -133,11 +117,6 @@ services:
       - $PORT
     secrets:
       - google_application_credentials
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.scoring_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/scores`)"
-      - "traefik.http.routers.scoring_app.entrypoints=websecure"
-      - "traefik.http.routers.scoring_app.tls.certresolver=myresolver"
   scoring_consumer:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/scoring_consumer:latest
     environment: 
@@ -165,11 +144,6 @@ services:
       - $PORT
     secrets:
       - google_application_credentials
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.location_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/location`)"
-      - "traefik.http.routers.location_app.entrypoints=websecure"
-      - "traefik.http.routers.location_app.tls.certresolver=myresolver"
   db:
     image: postgres:latest
     environment: 

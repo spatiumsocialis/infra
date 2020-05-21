@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  reverse_proxy:
+  circle:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.circle_app.rule=PathPrefix(`/circle`)"
+      - "traefik.http.routers.circle_app.entrypoints=web"
+  proximity:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.proximity_app.rule=PathPrefix(`/proximity`)"
+      - "traefik.http.routers.proximity_app.entrypoints=web"
+  scoring:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.scoring_app.rule=PathPrefix(`/scores`)"
+      - "traefik.http.routers.scoring_app.entrypoints=web"
+  location:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.location_app.rule=PathPrefix(`/location`)"
+      - "traefik.http.routers.location_app.entrypoints=web"

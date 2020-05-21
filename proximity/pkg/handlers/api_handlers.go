@@ -40,6 +40,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		}
 		// Add the user's UID from the auth token to the interaction
 		interaction.UID = user.ID
+		interaction.OtherUID = otherUserUID
 		s.DB.Create(&interaction)
 		json.NewEncoder(w).Encode(&interaction)
 		fmt.Printf("created interaction: %+v\n", interaction)
@@ -62,7 +63,11 @@ func GetInteractions(s *common.Service) http.Handler {
 		}
 		// Find the user's interactions and write them to the response
 		interactions := make([]models.Interaction, 0)
-		s.DB.Find(&interactions, models.Interaction{UID: user.ID})
+		s.DB.Where(models.Interaction{UID: user.ID}).Or(models.Interaction{OtherUID: user.ID}).Find(&interactions)
+		// Set all interactions UID field to the current uid for the response so no one else's UID gets leaked
+		for i := 0; i < len(interactions); i++ {
+			interactions[i].UID = user.ID
+		}
 		json.NewEncoder(w).Encode(interactions)
 
 	})
