@@ -1,0 +1,49 @@
+version: '3.7'
+services:
+  reverse_proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.2
+    # Enables the web UI and tells Traefik to listen to docker
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.watch=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
+      # tracing
+      - "--tracing.jaeger=true"
+      - "--tracing.jaeger.samplingServerURL=http://jaeger:5778/sampling"
+      - "--tracing.jaeger.localAgentHostPort=jaeger:6831"
+      - "--tracing.jaeger.samplingType=const"
+        # TLS
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.storage=/secrets/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.email=matt@axial.technology"
+      - "--certificatesresolvers.myersolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+  circle:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.circle_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/circle`)"
+      - "traefik.http.routers.circle_app.entrypoints=websecure"
+      - "traefik.http.routers.circle_app.tls.certresolver=myresolver"
+  proximity:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.proximity_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/proximity`)"
+      - "traefik.http.routers.proximity_app.entrypoints=websecure"
+      - "traefik.http.routers.proximity_app.tls.certresolver=myresolver"
+  scoring:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.scoring_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/scores`)"
+      - "traefik.http.routers.scoring_app.entrypoints=websecure"
+      - "traefik.http.routers.scoring_app.tls.certresolver=myresolver"
+  location:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.location_app.rule=Host(`spatiumsocialis.com`) && PathPrefix(`/location`)"
+      - "traefik.http.routers.location_app.entrypoints=websecure"
+      - "traefik.http.routers.location_app.tls.certresolver=myresolver"

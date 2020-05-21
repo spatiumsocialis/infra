@@ -18,6 +18,8 @@ type Interaction struct {
 	ID uint `gorm:"primary_key" json:"id"`
 	// Firebase UID of the user
 	UID string `json:"uid"`
+	// Firebase UID of the other user
+	OtherUID string `json:"-"`
 	// Average distance between the user and the other party in centimeters
 	Distance float32 `json:"distance"`
 	// Duration of the interaction in nanoseconds
