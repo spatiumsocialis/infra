@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/safe-distance/socium-infra/auth"
 	"github.com/safe-distance/socium-infra/common"
+	"github.com/safe-distance/socium-infra/proximity/config"
 	"github.com/safe-distance/socium-infra/proximity/pkg/models"
 )
 
@@ -38,6 +41,22 @@ func AddInteraction(s *common.Service) http.Handler {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+		// Check if we've already registered an interaction for these users in the debouncing window
+		startOfDebouncingPeriod := interaction.Timestamp.Add(-1 * time.Duration(config.InteractionDebouncingPeriod()) * time.Second)
+		fmt.Printf("start of debouncing period: %v\n", startOfDebouncingPeriod)
+		var mostRecentInteraction models.Interaction
+		query := s.DB.Where(models.Interaction{UID: user.ID, OtherUID: otherUserUID}).Or(models.Interaction{UID: otherUserUID, OtherUID: user.ID}).Order("timestamp desc")
+		query = query.Attrs(models.Interaction{UID: "not_found"}).FirstOrInit(&mostRecentInteraction)
+		if query.Error != nil {
+			common.ThrowError(w, fmt.Errorf("error retrieving most recent interaction between %v and %v: %v", user.ID, otherUserUID, err), http.StatusAlreadyReported)
+			return
+		}
+		if mostRecentInteraction.UID != "not_found" && mostRecentInteraction.Timestamp.After(startOfDebouncingPeriod) {
+			msg := fmt.Sprintf("error: interaction between these two users recorded at %v", mostRecentInteraction.Timestamp)
+			common.ThrowError(w, errors.New(msg), http.StatusAlreadyReported)
+			return
+		}
+
 		// Add the user's UID from the auth token to the interaction
 		interaction.UID = user.ID
 		interaction.OtherUID = otherUserUID
@@ -45,7 +64,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		json.NewEncoder(w).Encode(&interaction)
 		fmt.Printf("created interaction: %+v\n", interaction)
 
-		// Log a new interaction (send msg to kafka)
+		// Publish a new interaction (send msg to kafka)
 		common.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)
 
 	})

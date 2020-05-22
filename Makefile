@@ -30,7 +30,7 @@ clean-scoring:
 	rm -f ./scoring/$(BUILD_DIR)/${BINARY_NAME}
 clean: clean-circle clean-proximity clean-scoring
 token:
-	./auth/cmd/tokengen/tokengen.out -u $(uid)
+	./auth/cmd/tokengen/tokengen.out -u $(uid) | pbcopy
 run:
 	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
 push-deps:
