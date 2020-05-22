@@ -18,3 +18,6 @@ var Middleware = []mux.MiddlewareFunc{
 
 // ProductionTopic is the Kafka topic this service produces to
 const ProductionTopic = "interaction_added"
+
+// InteractionDebouncingPeriod is the number of seconds after receiving an interaction between two users for which subsequent interactions should be ignored
+const InteractionDebouncingPeriod = 60
