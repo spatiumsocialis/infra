@@ -42,14 +42,16 @@ func AddInteraction(s *common.Service) http.Handler {
 			return
 		}
 		// Check if we've already registered an interaction for these users in the debouncing window
-		startOfDebouncingPeriod := interaction.Timestamp.Add(-config.InteractionDebouncingPeriod * time.Second)
+		startOfDebouncingPeriod := interaction.Timestamp.Add(-1 * time.Duration(config.InteractionDebouncingPeriod()) * time.Second)
 		fmt.Printf("start of debouncing period: %v\n", startOfDebouncingPeriod)
 		var mostRecentInteraction models.Interaction
-		if err := s.DB.Where(models.Interaction{UID: user.ID, OtherUID: otherUserUID}).Or(models.Interaction{UID: otherUserUID, OtherUID: user.ID}).First(&mostRecentInteraction).Error; err != nil {
+		query := s.DB.Where(models.Interaction{UID: user.ID, OtherUID: otherUserUID}).Or(models.Interaction{UID: otherUserUID, OtherUID: user.ID}).Order("timestamp desc")
+		query = query.Attrs(models.Interaction{UID: "not_found"}).FirstOrInit(&mostRecentInteraction)
+		if query.Error != nil {
 			common.ThrowError(w, fmt.Errorf("error retrieving most recent interaction between %v and %v: %v", user.ID, otherUserUID, err), http.StatusAlreadyReported)
 			return
 		}
-		if mostRecentInteraction.Timestamp.After(startOfDebouncingPeriod) {
+		if mostRecentInteraction.UID != "not_found" && mostRecentInteraction.Timestamp.After(startOfDebouncingPeriod) {
 			msg := fmt.Sprintf("error: interaction between these two users recorded at %v", mostRecentInteraction.Timestamp)
 			common.ThrowError(w, errors.New(msg), http.StatusAlreadyReported)
 			return

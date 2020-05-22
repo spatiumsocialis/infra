@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"strconv"
+
 	"github.com/gorilla/mux"
 	"github.com/safe-distance/socium-infra/auth"
 )
@@ -19,5 +22,15 @@ var Middleware = []mux.MiddlewareFunc{
 // ProductionTopic is the Kafka topic this service produces to
 const ProductionTopic = "interaction_added"
 
+const debouncingPeriodEnvVariableName = "INTERACTION_DEBOUNCING_PERIOD_SECONDS"
+
 // InteractionDebouncingPeriod is the number of seconds after receiving an interaction between two users for which subsequent interactions should be ignored
-const InteractionDebouncingPeriod = 60
+func InteractionDebouncingPeriod() int {
+	period, err := strconv.Atoi(os.Getenv(debouncingPeriodEnvVariableName))
+	if err != nil {
+		return defaultInteractionDebouncingPeriod
+	}
+	return period
+}
+
+const defaultInteractionDebouncingPeriod = 60

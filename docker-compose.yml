@@ -91,6 +91,7 @@ services:
       PORT: $PORT
       KAFKA_PEERS: kafka:9092
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_application_credentials
+      INTERACTION_DEBOUNCING_PERIOD_SECONDS: $INTERACTION_DEBOUNCING_PERIOD_SECONDS
     expose:
       - $PORT
     secrets:
