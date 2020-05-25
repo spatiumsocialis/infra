@@ -18,7 +18,7 @@ import (
 type (
 	// contextKey represents keys into a request context
 	contextKey string
-	// Token is a proxy of the Firebase Auth SDKs token, so that importing packages won't need to import both auth packages
+	// Token is a proxy of the Firebase Auth SDKs token, so that importing packages won't need to import both auth packages explicitly
 	Token auth.Token
 
 	// User is just a gorm model wrapper for the Firebase UID to support circle queries

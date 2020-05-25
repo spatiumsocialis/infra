@@ -17,13 +17,7 @@ func main() {
 	common.RegisterKafkaClientFlags()
 	flag.Parse()
 	p := common.NewObjectLogProducer()
-	dailyAllowance := models.EventScore{
-		UID:       config.AllUserID,
-		EventID:   1,
-		EventType: models.DailyAllowance,
-		Timestamp: time.Now(),
-		Score:     config.DailyAllowancePoints,
-	}
+
 	schedule := os.Getenv("SCHEDULE")
 	if schedule == "" {
 		log.Fatal("SCHEDULE env var not set")
@@ -35,6 +29,13 @@ func main() {
 	err := c.AddFunc(
 		schedule,
 		func() {
+			dailyAllowance := models.EventScore{
+				UID:       config.AllUserID,
+				EventID:   1,
+				EventType: models.DailyAllowance,
+				Timestamp: time.Now(),
+				Score:     config.DailyAllowancePoints,
+			}
 			common.LogObject(p, dailyAllowance.UID, dailyAllowance, config.DailyAllowanceTopic)
 			fmt.Println("points awarded")
 		},
