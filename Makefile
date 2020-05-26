@@ -55,3 +55,7 @@ build: build-deps
 stop:
 	docker-compose down ${service}
 	@echo Services torn down
+deploy:
+	sh ./scripts/deploy.sh
+dockerhost:
+	sh ./scripts/dockerhost.sh
