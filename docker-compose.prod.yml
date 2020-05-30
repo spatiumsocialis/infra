@@ -1,8 +1,6 @@
 version: '3.7'
 services:
   reverse_proxy:
-    # The official v2 Traefik docker image
-    image: traefik:v2.2
     # Enables the web UI and tells Traefik to listen to docker
     command:
       - "--log.level=DEBUG"
@@ -23,7 +21,6 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/secrets/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.email=matt@axial.technology"
       - "--certificatesresolvers.myersolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
- 
   circle:
     labels:
       - "traefik.enable=true"
