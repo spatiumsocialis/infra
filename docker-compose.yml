@@ -128,12 +128,11 @@ services:
       KAFKA_CGROUP: scoring
     depends_on: 
       - kafka
-  scoring_daily_allowance_awarder:
-    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/scoring_daily_allowance_awarder:latest
-    container_name: infra_scoring_daily_allowance_awarder
+  daily_points_cron:
+    image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/daily_points_cron:latest
     environment: 
       KAFKA_PEERS: kafka:9092
-      SCHEDULE: 0 0 2 * * *
+      SCHEDULE: 0 0 4 * * *
   location:
     image: ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/location:latest
     environment: 

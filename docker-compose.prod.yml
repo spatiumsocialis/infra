@@ -23,6 +23,7 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/secrets/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.email=matt@axial.technology"
       - "--certificatesresolvers.myersolver.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
+ 
   circle:
     labels:
       - "traefik.enable=true"
@@ -47,3 +48,4 @@ services:
       - "traefik.http.routers.location_app.rule=Host(`$HOSTNAME`) && PathPrefix(`/location`)"
       - "traefik.http.routers.location_app.entrypoints=websecure"
       - "traefik.http.routers.location_app.tls.certresolver=myresolver"
+
