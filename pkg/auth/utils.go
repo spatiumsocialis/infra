@@ -10,8 +10,6 @@ import (
 	"os"
 )
 
-const uid = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
-
 // GenerateToken generates a valid Firebase auth token
 func GenerateToken(uid string) (string, error) {
 
