@@ -1,2 +1,0 @@
-#!/bin/bash
-docker build -t $IMAGE_NAME --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" .
