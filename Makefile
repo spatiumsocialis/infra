@@ -19,7 +19,8 @@ GOOGLE_PROJECT_ID=spatiumsocialis
 all: deps test build
 # TODO: Clean this mess up
 test: 
-	$(GOTEST) ./$(package)... $(ARGS)
+	$(GOTEST) -coverprofile=coverage.out ./$(package)... $(ARGS)
+	go tool cover -html=coverage.out
 .PHONY: test
 build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
@@ -34,12 +35,8 @@ pull:
 build-deps:
 	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ${BUILD_PACKAGE_DIR}/deps.Dockerfile ${PWD}
 start:
-	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml run --rm start_dependencies
-	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.${env}.yml up -d ${service}
-	@echo "Service(s) up and running!"
-	@echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
-	@echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080
-	@echo Services available at http://${DOCKERHOST}:80
+	sh ./scripts/start.sh ${BUILD_DEPLOY_DIR} ${env} ${service}
+	
 build: build-deps
 	PROJECT_ROOT=${PWD} SERVICE_DOCKERFILE=${SERVICE_DOCKERFILE} docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.build.yml build ${service}
 	@echo "Service(s) built!"

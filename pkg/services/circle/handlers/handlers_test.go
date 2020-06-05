@@ -23,6 +23,8 @@ var s *common.Service
 var saramaConfig *sarama.Config
 
 func TestMain(m *testing.M) {
+	os.Setenv("DB_PROVIDER", "sqlite3")
+	os.Setenv("DB_CONNECTION_STRING", ":memory:")
 	saramaConfig = sarama.NewConfig()
 	saramaConfig.Producer.Return.Successes = true
 	producer := common.NewNullAsyncProducer()
