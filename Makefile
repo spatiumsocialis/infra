@@ -33,13 +33,12 @@ push:
 pull:
 	docker-compose pull ${service}
 build-deps:
-	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ${BUILD_PACKAGE_DIR}/deps.Dockerfile ${PWD}
+	sh ./scripts/build-deps.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
 start:
 	sh ./scripts/start.sh ${BUILD_DEPLOY_DIR} ${env} ${service}
 	
 build: build-deps
-	PROJECT_ROOT=${PWD} SERVICE_DOCKERFILE=${SERVICE_DOCKERFILE} docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.build.yml build ${service}
-	@echo "Service(s) built!"
+	sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
 
 stop:
 	docker-compose ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}
