@@ -1,0 +1,65 @@
+version: '3.7'
+services:
+  circle:
+    build: 
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE
+      args: 
+        SERVICE: circle
+        EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  proximity:
+    build: 
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  proximity_consumer:
+    build: 
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args: 
+        SERVICE: proximity
+        EXECUTABLE: consumer
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  scoring:
+    build:
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  scoring_consumer:
+    build: 
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: consumer
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  daily_points_cron:
+    build: 
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args: 
+        SERVICE: scoring
+        EXECUTABLE: award_daily_points
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID
+  location:
+    build:
+      context: $PROJECT_ROOT
+      dockerfile: $SERVICE_DOCKERFILE 
+      args:
+        SERVICE: location
+        EXECUTABLE: app
+        GOOGLE_GCR_HOSTNAME: $GOOGLE_GCR_HOSTNAME
+        GOOGLE_PROJECT_ID: $GOOGLE_PROJECT_ID

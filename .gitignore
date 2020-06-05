@@ -8,4 +8,6 @@
 # Secrets (credentials etc)
 **/secrets/
 # VSCode crap
-.vscode/
+. vscode/
+# Coverage profile
+coverage.out

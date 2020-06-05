@@ -4,8 +4,10 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BUILD_DIR_APP=cmd/app
-BUILD_DIR_CONSUMER=cmd/consumer
+BUILD_DIR=./build
+BUILD_DEPLOY_DIR=$(BUILD_DIR)/deploy
+BUILD_PACKAGE_DIR=$(BUILD_DIR)/package
+SERVICE_DOCKERFILE=$(BUILD_PACKAGE_DIR)/service.Dockerfile
 SERVICES=circle proximity scoring
 EXECUTABLES=app consumer
 BINARY_NAME_APP=app.out
@@ -17,43 +19,29 @@ GOOGLE_PROJECT_ID=spatiumsocialis
 all: deps test build
 # TODO: Clean this mess up
 test: 
-	$(GOTEST) -v ./$(PACKAGE)... $(ARGS)
+	$(GOTEST) -coverprofile=coverage.out ./$(package)... $(ARGS)
+	go tool cover -html=coverage.out
 .PHONY: test
-clean-circle:
-	$(GOCLEAN)
-	rm -f ./circle/$(BUILD_DIR)/${BINARY_NAME}
-clean-proximity:
-	$(GOCLEAN)
-	rm -f ./proximity/$(BUILD_DIR)/${BINARY_NAME}
-clean-scoring:
-	$(GOCLEAN)
-	rm -f ./scoring/$(BUILD_DIR)/${BINARY_NAME}
-clean: clean-circle clean-proximity clean-scoring
+build-token:
+	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
 token:
-	./auth/cmd/tokengen/tokengen.out -u $(uid)
-run:
-	./$(PACKAGE)$(BUILD_DIR)/$(EXEC) $(ARGS)
+	./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
 push-deps:
 	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
 push:
-	docker-compose -f docker-compose.yml -f docker-compose.build.yml push ${service}
+	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.build.yml push ${service}
 pull:
 	docker-compose pull ${service}
 build-deps:
-	docker build -t ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest -f ./deps.Dockerfile .
+	sh ./scripts/build-deps.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
 start:
-	docker-compose run --rm start_dependencies
-	docker-compose -f docker-compose.yml -f docker-compose.${env}.yml up -d ${service}
-	@echo "Service(s) up and running!"
-	@echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
-	@echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080
-	@echo Services available at http://${DOCKERHOST}:80
+	sh ./scripts/start.sh ${BUILD_DEPLOY_DIR} ${env} ${service}
+	
 build: build-deps
-	docker-compose -f docker-compose.yml -f docker-compose.build.yml build ${service}
-	@echo "Service(s) built!"
+	sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
 
 stop:
-	docker-compose down ${service}
+	docker-compose ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}
 	@echo Services torn down
 deploy:
 	sh ./scripts/deploy.sh
