@@ -19,8 +19,8 @@ GOOGLE_PROJECT_ID=spatiumsocialis
 all: deps test build
 # TODO: Clean this mess up
 test: 
-	$(GOTEST) -coverprofile=coverage.out ./$(package)... $(ARGS)
-	go tool cover -html=coverage.out
+	$(GOTEST) -coverprofile=/tmp/coverage.out ./$(package)... $(ARGS)
+	go tool cover -html=/tmp/coverage.out
 .PHONY: test
 build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
