@@ -9,8 +9,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
 	"github.com/safe-distance/socium-infra/pkg/services/scoring/models"
 )
 

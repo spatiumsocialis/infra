@@ -5,8 +5,9 @@ import (
 	"time"
 
 	"github.com/safe-distance/socium-infra/configs/services/circle/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 )
 
 // Schema holds the list of models that the DB schema contains
@@ -83,7 +84,7 @@ func AddUserToCircle(s *common.Service, user *auth.User, circle *Circle, mergeCi
 		}
 	}
 	// Log updated user
-	common.LogObject(s.Producer, user.ID, user, config.ProductionTopic)
+	kafka.LogObject(s.Producer, user.ID, user, config.ProductionTopic)
 	return nil
 }
 

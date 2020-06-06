@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
 	"github.com/safe-distance/socium-infra/pkg/services/circle/models"
 )
 

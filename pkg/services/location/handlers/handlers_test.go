@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,8 +16,8 @@ import (
 	"github.com/Shopify/sarama/mocks"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/safe-distance/socium-infra/configs/services/location/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
 	"github.com/safe-distance/socium-infra/pkg/services/location/models"
 )
 
@@ -25,6 +26,9 @@ var s *common.Service
 var saramaConfig *sarama.Config
 
 func TestMain(m *testing.M) {
+	if err := common.LoadEnv(); err != nil {
+		log.Fatalln(err)
+	}
 	os.Setenv("DB_PROVIDER", "sqlite3")
 	os.Setenv("DB_CONNECTION_STRING", ":memory:")
 

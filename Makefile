@@ -23,7 +23,7 @@ endif
 all: deps test build
 test: 
 	# TODO sourcing env like this doesn't work
-	${GOTEST} -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
+	PROJECT_ROOT=$(PWD) ${GOTEST} -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
 .PHONY: test
 coverage:
 	go tool cover -html=/tmp/coverage.out

@@ -8,12 +8,13 @@ import (
 
 	"github.com/safe-distance/socium-infra/configs/services/location/config"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 	"github.com/safe-distance/socium-infra/pkg/services/location/models"
 	"github.com/safe-distance/socium-infra/pkg/services/location/routes"
 )
 
 func main() {
-	producer := common.NewNullAsyncProducer()
+	producer := kafka.NewNullAsyncProducer()
 	common.LoadEnv(false)
 	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
 	port := os.Getenv("PORT")

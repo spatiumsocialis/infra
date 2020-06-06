@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/safe-distance/socium-infra/configs/services/proximity/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 	"github.com/safe-distance/socium-infra/pkg/services/proximity/models"
 )
 
@@ -65,7 +66,7 @@ func AddInteraction(s *common.Service) http.Handler {
 		fmt.Printf("created interaction: %+v\n", interaction)
 
 		// Publish a new interaction (send msg to kafka)
-		common.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)
+		kafka.LogObject(s.Producer, string(interaction.ID), interaction, s.ProductionTopic)
 
 	})
 }

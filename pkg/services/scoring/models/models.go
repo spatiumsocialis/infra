@@ -8,8 +8,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
 )
 
 type (

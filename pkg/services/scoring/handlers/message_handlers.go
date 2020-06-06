@@ -6,15 +6,16 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 	"github.com/safe-distance/socium-infra/pkg/services/scoring/models"
 	"github.com/safe-distance/socium-infra/pkg/services/scoring/models/messages"
 )
 
 // handleInteractionAddedMessage handles messages on the interaction_added topic (serialized proximity.Interaction objects)
 func handleInteractionAddedMessage(s *common.Service, m *sarama.ConsumerMessage) error {
-	var ole common.ObjectLogEntry
+	var ole kafka.ObjectLogEntry
 	json.Unmarshal(m.Value, &ole)
 	var i messages.ProximityInteraction
 	json.Unmarshal(ole.Object, &i)
@@ -31,7 +32,7 @@ func handleInteractionAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 
 // handleDailyPointsAddedMessage handles messages on the daily_allowance_awarded topic (serialized models.EventScore objects)
 func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage) error {
-	var ole common.ObjectLogEntry
+	var ole kafka.ObjectLogEntry
 
 	if err := json.Unmarshal(m.Value, &ole); err != nil {
 		return err
@@ -56,8 +57,8 @@ func handleDailyPointsAddedMessage(s *common.Service, m *sarama.ConsumerMessage)
 }
 
 // TopicHandlerMap maps topic names to the handlers which handle messages consumed from them
-var TopicHandlerMap = map[string]common.MessageHandler{
+var TopicHandlerMap = map[string]kafka.MessageHandler{
 	"interaction_added":        handleInteractionAddedMessage,
 	config.DailyAllowanceTopic: handleDailyPointsAddedMessage,
-	"user_modified":            common.SaveUpdatedUserMessageHandler,
+	"user_modified":            kafka.SaveUpdatedUserMessageHandler,
 }

@@ -9,14 +9,15 @@ import (
 
 	"github.com/safe-distance/socium-infra/configs/services/proximity/config"
 	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 	"github.com/safe-distance/socium-infra/pkg/services/proximity/models"
 	"github.com/safe-distance/socium-infra/pkg/services/proximity/routes"
 )
 
 func main() {
-	common.RegisterKafkaClientFlags()
+	kafka.RegisterClientFlags()
 	flag.Parse()
-	producer := common.NewObjectLogProducer()
+	producer := kafka.NewObjectLogProducer()
 	common.LoadEnv(false)
 	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
 	port := os.Getenv("PORT")

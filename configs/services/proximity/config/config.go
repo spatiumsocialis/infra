@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/safe-distance/socium-infra/pkg/auth"
+	"github.com/safe-distance/socium-infra/pkg/common/auth"
 )
 
 // ServiceName is the name of the service

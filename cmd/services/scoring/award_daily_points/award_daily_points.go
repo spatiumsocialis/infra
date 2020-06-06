@@ -9,14 +9,14 @@ import (
 
 	"github.com/robfig/cron"
 	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/safe-distance/socium-infra/pkg/common/kafka"
 	"github.com/safe-distance/socium-infra/pkg/services/scoring/models"
 )
 
 func main() {
-	common.RegisterKafkaClientFlags()
+	kafka.RegisterClientFlags()
 	flag.Parse()
-	p := common.NewObjectLogProducer()
+	p := kafka.NewObjectLogProducer()
 
 	schedule := os.Getenv("SCHEDULE")
 	if schedule == "" {
@@ -36,7 +36,7 @@ func main() {
 				Timestamp: time.Now(),
 				Score:     config.DailyAllowancePoints,
 			}
-			common.LogObject(p, dailyAllowance.UID, dailyAllowance, config.DailyAllowanceTopic)
+			kafka.LogObject(p, dailyAllowance.UID, dailyAllowance, config.DailyAllowanceTopic)
 			fmt.Println("points awarded")
 		},
 	)
