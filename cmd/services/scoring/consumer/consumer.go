@@ -13,7 +13,7 @@ import (
 func main() {
 	kafka.RegisterClientFlags()
 	flag.Parse()
-	producer := common.NullAsyncProducer{}
+	producer := kafka.NullAsyncProducer{}
 	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
-	common.NewConsumer(s, handlers.TopicHandlerMap)
+	kafka.NewConsumer(s, handlers.TopicHandlerMap)
 }

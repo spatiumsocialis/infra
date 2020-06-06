@@ -15,7 +15,7 @@ import (
 
 func main() {
 	producer := kafka.NewNullAsyncProducer()
-	common.LoadEnv(false)
+	common.LoadEnv()
 	s := common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
 	port := os.Getenv("PORT")
 	if port == "" {

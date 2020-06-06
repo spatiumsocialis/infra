@@ -5,7 +5,6 @@
 # $4: Specific service name (optional)
 
 source .env
-source ./scripts/dockerhost.sh
 export PROJECT_ROOT=$1
 export SERVICE_DOCKERFILE=$2/service.Dockerfile
 docker-compose -f $3/docker-compose.yml -f $3/docker-compose.build.yml push $4

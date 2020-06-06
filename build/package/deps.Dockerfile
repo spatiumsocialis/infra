@@ -15,7 +15,6 @@ ENV GOPRIVATE=github.com/safe-distance
 
 # Copy the application source code.
 WORKDIR /go/src/app
-COPY ./pkg/auth ./pkg/auth
 COPY ./pkg/common ./pkg/common
 
 # # add ssh credentials on build
