@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,122 +15,63 @@ import (
 	"github.com/safe-distance/socium-infra/pkg/auth"
 	"github.com/safe-distance/socium-infra/pkg/common"
 	"github.com/safe-distance/socium-infra/pkg/services/circle/models"
+	"github.com/stretchr/testify/assert"
 )
 
 var s *common.Service
 
 var saramaConfig *sarama.Config
+var producer sarama.AsyncProducer
+var validUsers = []auth.User{
+	{ID: "1"},
+	{ID: "2"},
+	{ID: "3"},
+}
+
+var validCircle = models.Circle{ID: "123", Users: validUsers}
+var testUID = "TEST_UID"
+var testToken = &auth.Token{UID: testUID}
 
 func TestMain(m *testing.M) {
 	os.Setenv("DB_PROVIDER", "sqlite3")
 	os.Setenv("DB_CONNECTION_STRING", ":memory:")
 	saramaConfig = sarama.NewConfig()
 	saramaConfig.Producer.Return.Successes = true
-	producer := common.NewNullAsyncProducer()
-	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	producer = common.NewNullAsyncProducer()
 	os.Exit(m.Run())
 }
 
-func TestUserHandler(t *testing.T) {
-	// Create a test user and a test token
-	testUID := "TEST_UID"
-	testCircleID := "TEST_CIRCLE_ID"
-	testCircle := models.Circle{ID: testCircleID}
-	testToken := &auth.Token{UID: testUID}
-
-	// Marshal the text interaction to JSON, as it would be received in a POST request
-	payload, err := json.Marshal(testCircle)
-	if err != nil {
-		t.Fatalf("Error marshaling test circle: %v", err.Error())
-	}
-
-	// Create a test request and add the test token to its context
-	r := httptest.NewRequest("PATCH", "/circles/add", bytes.NewBuffer(payload))
-	ctx := auth.AddTokenTo(context.Background(), testToken)
+func TestGetCircle_Valid(t *testing.T) {
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	err := s.DB.Create(&validCircle).Error
+	assert.Nil(t, err)
+	token := &auth.Token{UID: "1"}
+	r := httptest.NewRequest("GET", "/irrelevant", nil)
+	ctx := auth.AddTokenTo(context.Background(), token)
 	w := httptest.NewRecorder()
-	// Call the interaction handler with the response recorder and test request
-	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
-
-	if w.Code != http.StatusOK {
-		body, _ := ioutil.ReadAll(w.Result().Body)
-		t.Fatalf("Error adding user to circle: %v", string(body))
-	}
-
-	//  Read the body of the response recorder
-	resBuffer := bytes.NewBuffer([]byte{})
-	_, err = resBuffer.ReadFrom(w.Result().Body)
-	if err != nil {
-		t.Fatalf("Error reading from response buffer: %v", err.Error())
-	}
-
-	// Unmarshal the returned interaction
-	var createdCircle models.Circle
-	err = json.Unmarshal(resBuffer.Bytes(), &createdCircle)
-	if err != nil {
-		t.Fatalf("Error unmarshalling response body into Circle: %v", err.Error())
-	}
-
-	t.Logf("PATCH response circle: %+v", createdCircle)
-
-	// PATCH
-	newUserID := "NEW_USER_ID"
-	newTestToken := &auth.Token{UID: newUserID}
-
-	// Marshal the text interaction to JSON, as it would be received in a PATCH request
-	payload, err = json.Marshal(testCircle)
-	if err != nil {
-		t.Fatalf("Error marshaling test circle: %v", err.Error())
-	}
-
-	// Make a PATCH request to update the user
-	r = httptest.NewRequest("PATCH", "/circles", bytes.NewBuffer(payload))
-	w = httptest.NewRecorder()
-	ctx = auth.AddTokenTo(context.Background(), newTestToken)
-
-	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
-
-	//  Read the body of the response recorder
-	resBuffer = bytes.NewBuffer([]byte{})
-	_, err = resBuffer.ReadFrom(w.Result().Body)
-	if err != nil {
-		t.Fatalf("Error reading from response buffer: %v", err.Error())
-	}
-
-	// Unmarshal the returned interaction
-	var updatedCircle models.Circle
-	err = json.Unmarshal(resBuffer.Bytes(), &updatedCircle)
-	if err != nil {
-		t.Fatalf("Error unmarshalling response body into Circle: %v", err.Error())
-	}
-
-	t.Logf("PATCH response circle: %+v", updatedCircle)
-
-	// Make a GET request to retrieve the interaction
-	r = httptest.NewRequest("GET", "/circles", nil)
-	w = httptest.NewRecorder()
-	ctx = auth.AddTokenTo(r.Context(), testToken)
-	// Call the interaction handler with the response recorder and test request
 	GetCircle(s).ServeHTTP(w, r.WithContext(ctx))
+	assert.Equal(t, http.StatusOK, w.Code)
+	var responseCircle models.Circle
+	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
+	assert.Nil(t, err)
+	assert.Equal(t, validCircle.ID, responseCircle.ID)
+	assert.Equal(t, len(validCircle.Users), len(responseCircle.Users))
 
-	//  Read the body of the response recorder
-	resBuffer = bytes.NewBuffer([]byte{})
-	_, err = resBuffer.ReadFrom(w.Result().Body)
-	if err != nil {
-		t.Fatalf("Error reading from response buffer: %v", err.Error())
-	}
+}
 
-	// Unmarshal the returned interaction
-	var retrievedCircle models.Circle
-	err = json.Unmarshal(resBuffer.Bytes(), &retrievedCircle)
-	if err != nil {
-		t.Fatalf("Error unmarshalling response body into Circle: %v", err.Error())
-	}
-
-	t.Logf("GET response circle: %+v", retrievedCircle)
-
-	// Check that the two interactions are equal
-	if len(updatedCircle.Users) != len(retrievedCircle.Users) {
-		t.Fatal("Fail: circles returned by PATCH and by GET are not equal")
-	}
-
+func TestAddToCircle_Valid(t *testing.T) {
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	err := s.DB.Create(&validCircle).Error
+	assert.Nil(t, err)
+	token := &auth.Token{UID: "4"}
+	payload, err := json.Marshal(map[string]string{"id": "123"})
+	assert.Nil(t, err)
+	r := httptest.NewRequest("PATCH", "/irrelevant", bytes.NewBuffer(payload))
+	ctx := auth.AddTokenTo(context.Background(), token)
+	w := httptest.NewRecorder()
+	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
+	assert.Equal(t, http.StatusOK, w.Code)
+	var responseCircle models.Circle
+	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
+	assert.Equal(t, 4, len(responseCircle.Users))
 }
