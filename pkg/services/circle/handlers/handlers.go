@@ -27,18 +27,29 @@ func AddToCircle(s *common.Service) http.Handler {
 		// Read the request body
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			common.ThrowError(w, fmt.Errorf("Error reading request body: %v", err.Error()), http.StatusInternalServerError)
+			common.ThrowError(w, fmt.Errorf("error reading request body: %v", err.Error()), http.StatusBadRequest)
 			return
 		}
 		// Unmarshal the circle
 		var circle models.Circle
 		if err := json.Unmarshal(body, &circle); err != nil {
-			common.ThrowError(w, fmt.Errorf("Error unmarshalling circle: %v", err.Error()), http.StatusInternalServerError)
+			common.ThrowError(w, fmt.Errorf("Error unmarshalling circle: %v", err.Error()), http.StatusBadRequest)
 			return
 		}
 
 		if circle.ID == "" {
 			common.ThrowError(w, fmt.Errorf("bad request: 'id' parameter missing from request body"), http.StatusBadRequest)
+			return
+		}
+
+		// Check if circle exists
+		if err := s.DB.Preload("Users").FirstOrInit(&circle).Error; err != nil {
+			common.ThrowError(w, err, http.StatusInternalServerError)
+			return
+		}
+		if len(circle.Users) == 0 {
+			// doesn't exist
+			common.ThrowError(w, fmt.Errorf("bad request: circle %v doesn't exist", circle.ID), http.StatusBadRequest)
 			return
 		}
 

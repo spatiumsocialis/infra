@@ -92,3 +92,17 @@ func TestAddToCircle_Valid(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
 	assert.Equal(t, 4, len(responseCircle.Users))
 }
+
+func TestAddToCircle_Invalid(t *testing.T) {
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	err := s.DB.Create(&validCircle).Error
+	assert.Nil(t, err)
+	token := &auth.Token{UID: "4"}
+	payload, err := json.Marshal(map[string]string{"id": "9999"})
+	assert.Nil(t, err)
+	r := httptest.NewRequest("PATCH", "/irrelevant", bytes.NewBuffer(payload))
+	ctx := auth.AddTokenTo(context.Background(), token)
+	w := httptest.NewRecorder()
+	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}

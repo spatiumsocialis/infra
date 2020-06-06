@@ -46,7 +46,6 @@ func AddUserToCircle(s *common.Service, user *auth.User, circle *Circle, mergeCi
 	if err := s.DB.Preload("Users").FirstOrCreate(circle, Circle{ID: circle.ID}).Error; err != nil {
 		return fmt.Errorf("error retrieving/creating circle: %v", err.Error())
 	}
-	fmt.Printf("circle: %+v\n", circle)
 	oldCircleID := user.CircleID
 	// Start association mode
 	association := s.DB.Model(circle).Association("Users")
