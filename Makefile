@@ -15,25 +15,24 @@ BINARY_NAME_CONSUMER=consumer.out
 BINARY_UNIX=$(BINARY_NAME)_unix
 GOOGLE_GCR_HOSTNAME=gcr.io
 GOOGLE_PROJECT_ID=spatiumsocialis
-SOURCE_ENV=source .env
 
 ifeq ($(env),)
 env := dev
 endif
 
 all: deps test build
-# TODO: Clean this mess up
 test: 
-	$(SOURCE_ENV) && $(GOTEST) -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
+	# TODO sourcing env like this doesn't work
+	${GOTEST} -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
 .PHONY: test
 coverage:
 	go tool cover -html=/tmp/coverage.out
 build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
 token:
-	$(SOURCE_ENV) && ./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
+	./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
 push-deps:
-	$(SOURCE_ENV) && docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
+	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
 push:
 	sh ./scripts/push.sh ${PWD} ${BUILD_PACKAGE_DIR} ${BUILD_DEPLOY_DIR} ${service}
 pull:
