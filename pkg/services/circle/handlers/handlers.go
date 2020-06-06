@@ -43,13 +43,15 @@ func AddToCircle(s *common.Service) http.Handler {
 		}
 
 		// Check if circle exists
-		if err := s.DB.Preload("Users").FirstOrInit(&circle).Error; err != nil {
-			common.ThrowError(w, err, http.StatusInternalServerError)
-			return
-		}
-		if len(circle.Users) == 0 {
+		query := s.DB.Find(&circle)
+		if query.RecordNotFound() {
 			// doesn't exist
 			common.ThrowError(w, fmt.Errorf("bad request: circle %v doesn't exist", circle.ID), http.StatusBadRequest)
+			return
+		}
+
+		if query.Error != nil {
+			common.ThrowError(w, query.Error, http.StatusInternalServerError)
 			return
 		}
 
