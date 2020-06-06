@@ -51,12 +51,29 @@ func TestGetCircle_Valid(t *testing.T) {
 	w := httptest.NewRecorder()
 	GetCircle(s).ServeHTTP(w, r.WithContext(ctx))
 	assert.Equal(t, http.StatusOK, w.Code)
-	var responseCircle models.Circle
+	var responseCircle models.CircleResponse
 	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
 	assert.Nil(t, err)
 	assert.Equal(t, validCircle.ID, responseCircle.ID)
 	assert.Equal(t, len(validCircle.Users), len(responseCircle.Users))
 
+}
+
+func TestGetCircle_NoCircle(t *testing.T) {
+	s = common.NewService(config.ServiceName, config.ServicePathPrefix, models.Schema, producer, config.ProductionTopic)
+	err := s.DB.Create(&validCircle).Error
+	assert.Nil(t, err)
+	token := &auth.Token{UID: "99"}
+	r := httptest.NewRequest("GET", "/irrelevant", nil)
+	ctx := auth.AddTokenTo(context.Background(), token)
+	w := httptest.NewRecorder()
+	GetCircle(s).ServeHTTP(w, r.WithContext(ctx))
+	assert.Equal(t, http.StatusOK, w.Code)
+	var responseCircle models.CircleResponse
+	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(responseCircle.Users))
+	assert.Equal(t, token.UID, responseCircle.Users[0].UID)
 }
 
 func TestAddToCircle_Valid(t *testing.T) {
@@ -71,7 +88,7 @@ func TestAddToCircle_Valid(t *testing.T) {
 	w := httptest.NewRecorder()
 	AddToCircle(s).ServeHTTP(w, r.WithContext(ctx))
 	assert.Equal(t, http.StatusOK, w.Code)
-	var responseCircle models.Circle
+	var responseCircle models.CircleResponse
 	err = json.Unmarshal(w.Body.Bytes(), &responseCircle)
 	assert.Equal(t, 4, len(responseCircle.Users))
 }
