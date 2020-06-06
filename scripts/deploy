@@ -1,0 +1,4 @@
+zip -r dist.zip build/ scripts/ Makefile
+gcloud beta compute scp -q --zone "us-central1-a" --project "spatiumsocialis" ./dist.zip spatium-prod:~/
+gcloud beta compute ssh  'spatium-prod' --zone "us-central1-a"  --project "spatiumsocialis"  --command 'unzip -o ./dist.zip; chmod +x ./scripts/*; make pull; make start env=prod; exit'
+rm ./dist.zip

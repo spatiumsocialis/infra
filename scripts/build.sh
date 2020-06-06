@@ -4,5 +4,6 @@
 # $3: Build deploy dir
 # $4: Service name
 
+source .env
 source ./scripts/dockerhost.sh
 PROJECT_ROOT=$1 SERVICE_DOCKERFILE=$2 docker-compose -f $3/docker-compose.yml -f $3/docker-compose.build.yml build $4

@@ -1,11 +1,11 @@
 # Arguments
-# $1: path to dir containing Dockerfiles
-# $2: environment {"dev", "prod"}
-# $3: service (optional)
+# $1: Project root dir
+# $2: path to dir containing Dockerfiles
+# $3: environment {"dev", "prod"}
+# $4: service (optional)
 
-source ./scripts/dockerhost.sh
-docker-compose -f $1/docker-compose.yml run --rm start_dependencies
-docker-compose -f $1/docker-compose.yml -f $1/docker-compose.$2.yml up -d $3
+docker-compose -f $2/docker-compose.yml run --rm start_dependencies
+docker-compose -f $2/docker-compose.yml -f $2/docker-compose.$3.yml up -d $4
 echo "Service(s) up and running!"
 echo Jaeger tracing dashboard available at http://${DOCKERHOST}:16686
 echo Traefik load balancer dashboard available at http://${DOCKERHOST}:8080
