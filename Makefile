@@ -15,30 +15,37 @@ BINARY_NAME_CONSUMER=consumer.out
 BINARY_UNIX=$(BINARY_NAME)_unix
 GOOGLE_GCR_HOSTNAME=gcr.io
 GOOGLE_PROJECT_ID=spatiumsocialis
+SOURCE_ENV=source .env
+
+
+ifeq ($(env),)
+env := dev
+endif
 
 all: deps test build
 # TODO: Clean this mess up
 test: 
-	$(GOTEST) -coverprofile=/tmp/coverage.out ./$(package)... $(ARGS)
-	go tool cover -html=/tmp/coverage.out
+	$(SOURCE_ENV) && $(GOTEST) -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
 .PHONY: test
+coverage:
+	go tool cover -html=/tmp/coverage.out
 build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
 token:
-	./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
+	$(SOURCE_ENV) && ./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
 push-deps:
-	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
+	$(SOURCE_ENV) && docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
 push:
-	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.build.yml push ${service}
+	$(SOURCE_ENV) && docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml -f ${BUILD_DEPLOY_DIR}/docker-compose.build.yml push ${service}
 pull:
 	docker-compose pull ${service}
 build-deps:
-	sh ./scripts/build-deps.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
+	$(SOURCE_ENV) && sh ./scripts/build-deps.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
 start:
 	sh ./scripts/start.sh ${BUILD_DEPLOY_DIR} ${env} ${service}
 	
 build: build-deps
-	sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
+	$(SOURCE_ENV) && sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
 
 stop:
 	docker-compose ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}

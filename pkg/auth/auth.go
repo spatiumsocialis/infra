@@ -79,11 +79,10 @@ func GetUserProfiles(users ...User) ([]Profile, error) {
 	for i, u := range users {
 		p := Profile{UID: u.ID}
 		userRecord, err := client.GetUser(ctx, u.ID)
-		if err != nil {
-			return []Profile{}, fmt.Errorf("error getting user '%v': %v", u.ID, err)
+		if err == nil {
+			p.Name = userRecord.DisplayName
+			p.ProfilePicture = userRecord.PhotoURL
 		}
-		p.Name = userRecord.DisplayName
-		p.ProfilePicture = userRecord.PhotoURL
 		profiles[i] = p
 	}
 	return profiles, nil
