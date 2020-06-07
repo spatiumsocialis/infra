@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: scoring-svc
+    labels:
+        app: scoring
+spec:
+    type: ClusterIp
+    ports:
+        - port: 80
+    selector:
+        app: scoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: scoring
+    labels:
+        app: scoring
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: scoring
+    template:
+        metadata:
+           labels:
+              app: scoring
+        spec:
+           containers:
+              - name: scoring-app
+                image: gcr.io/spatiumsocialis/scoring:latest
+                ports:
+                    - containerPort: 8080
+
+

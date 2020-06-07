@@ -44,7 +44,7 @@ start:
 build: build-deps
 	sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
 stop:
-	docker-compose ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}
+	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}
 	@echo Services torn down
 deploy:
 	sh ./scripts/deploy.sh
