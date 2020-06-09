@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,7 @@ func addTokenToRequest(r *http.Request, token string) {
 }
 
 func testMiddlewareHelper(t *testing.T, shouldSucceed bool, testToken func(validToken string) string) {
-	// api key retrieved from https://console.firebase.google.com/u/0/project/safe-distance-e4683/settings/general
+	// api key retrieved from https://console.firebase.google.com/u/0/project/spatiumsocialis-e4683/settings/general
 	token, err := GenerateToken(TestUID)
 	assert.Nil(t, err)
 

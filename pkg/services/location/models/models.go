@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common"
 )
 
 // Schema holds the list of models that the DB schema contains

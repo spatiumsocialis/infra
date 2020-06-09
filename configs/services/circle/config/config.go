@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
 )
 
 // ServiceName is the name of the service

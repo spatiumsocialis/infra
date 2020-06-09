@@ -13,7 +13,7 @@ import (
 // GenerateToken generates a valid Firebase auth token
 func GenerateToken(uid string) (string, error) {
 
-	// api key retrieved from https://console.firebase.google.com/u/0/project/safe-distance-e4683/settings/general
+	// api key retrieved from https://console.firebase.google.com/u/0/project/spatiumsocialis-e4683/settings/general
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 
 	if apiKey == "" {

@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/services/location/models"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/services/location/models"
 )
 
 // AddPing handles requests for adding new pings

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
 )
 
 func main() {

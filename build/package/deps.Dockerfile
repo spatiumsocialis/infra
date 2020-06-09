@@ -11,7 +11,7 @@ RUN go mod download
 ARG SSH_PRIVATE_KEY
 
 # Set GOPRIVATE
-ENV GOPRIVATE=github.com/safe-distance
+ENV GOPRIVATE=github.com/spatiumsocialis
 
 # Copy the application source code.
 WORKDIR /go/src/app

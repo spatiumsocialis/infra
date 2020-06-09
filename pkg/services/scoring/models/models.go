@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/configs/services/scoring/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
 )
 
 type (

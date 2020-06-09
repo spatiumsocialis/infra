@@ -3,8 +3,8 @@ package routes
 import (
 	"strings"
 
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/services/circle/handlers"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/services/circle/handlers"
 )
 
 // Routes holds the service's HTTP routes

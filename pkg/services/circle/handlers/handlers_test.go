@@ -12,11 +12,11 @@ import (
 
 	"github.com/Shopify/sarama"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/safe-distance/socium-infra/configs/services/circle/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
-	"github.com/safe-distance/socium-infra/pkg/common/kafka"
-	"github.com/safe-distance/socium-infra/pkg/services/circle/models"
+	"github.com/spatiumsocialis/infra/configs/services/circle/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/common/kafka"
+	"github.com/spatiumsocialis/infra/pkg/services/circle/models"
 	"github.com/stretchr/testify/assert"
 )
 

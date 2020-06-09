@@ -15,10 +15,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/safe-distance/socium-infra/configs/services/location/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
-	"github.com/safe-distance/socium-infra/pkg/services/location/models"
+	"github.com/spatiumsocialis/infra/configs/services/location/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/services/location/models"
 )
 
 var s *common.Service
