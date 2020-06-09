@@ -1,4 +1,4 @@
-# :mask: spatium infra
+# :mask: spatium-socialis/infra
 
 ### Setup
 1. Install Docker Desktop https://docs.docker.com/docker-for-mac/install/
