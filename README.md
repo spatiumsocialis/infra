@@ -1,4 +1,4 @@
-# spatium infra :mask:
+# :mask: spatium infra
 
 ### Setup
 1. Install Docker Desktop https://docs.docker.com/docker-for-mac/install/
