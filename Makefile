@@ -51,3 +51,5 @@ ssh:
 	gcloud beta compute ssh --zone "us-central1-a" "spatium-prod" --project "spatiumsocialis"
 dockerhost:
 	sh ./scripts/dockerhost.sh
+dockerhost-mac:
+	sh ./scripts/dockerhost_mac.sh
