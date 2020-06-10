@@ -3,8 +3,8 @@ package routes
 import (
 	"strings"
 
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/services/proximity/handlers"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/services/proximity/handlers"
 )
 
 // Routes holds the service's routes

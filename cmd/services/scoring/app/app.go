@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/kafka"
-	"github.com/safe-distance/socium-infra/pkg/services/scoring/models"
-	"github.com/safe-distance/socium-infra/pkg/services/scoring/routes"
+	"github.com/spatiumsocialis/infra/configs/services/scoring/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/kafka"
+	"github.com/spatiumsocialis/infra/pkg/services/scoring/models"
+	"github.com/spatiumsocialis/infra/pkg/services/scoring/routes"
 )
 
 func main() {

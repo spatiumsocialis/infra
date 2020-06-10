@@ -9,9 +9,9 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
-	"github.com/safe-distance/socium-infra/pkg/services/circle/models"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/services/circle/models"
 )
 
 // AddToCircle returns a handler which adds the current user to the specified circle

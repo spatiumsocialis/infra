@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
 )
 
 // SaveUpdatedUserMessageHandler decodes the user from the message and saves it

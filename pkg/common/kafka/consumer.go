@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/Shopify/sarama"
-	"github.com/safe-distance/socium-infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common"
 )
 
 type (

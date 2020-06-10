@@ -22,7 +22,6 @@ endif
 
 all: deps test build
 test: 
-	# TODO sourcing env like this doesn't work
 	PROJECT_ROOT=$(PWD) ${GOTEST} -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
 .PHONY: test
 coverage:

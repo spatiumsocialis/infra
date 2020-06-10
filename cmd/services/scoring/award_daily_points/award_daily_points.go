@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/robfig/cron"
-	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/common/kafka"
-	"github.com/safe-distance/socium-infra/pkg/services/scoring/models"
+	"github.com/spatiumsocialis/infra/configs/services/scoring/config"
+	"github.com/spatiumsocialis/infra/pkg/common/kafka"
+	"github.com/spatiumsocialis/infra/pkg/services/scoring/models"
 )
 
 func main() {

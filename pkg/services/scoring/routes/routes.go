@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/safe-distance/socium-infra/configs/services/scoring/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/services/scoring/handlers"
+	"github.com/spatiumsocialis/infra/configs/services/scoring/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/services/scoring/handlers"
 )
 
 // Routes holds the service's HTTP routes

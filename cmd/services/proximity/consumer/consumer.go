@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 
-	"github.com/safe-distance/socium-infra/configs/services/proximity/config"
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/kafka"
-	"github.com/safe-distance/socium-infra/pkg/services/proximity/handlers"
-	"github.com/safe-distance/socium-infra/pkg/services/proximity/models"
+	"github.com/spatiumsocialis/infra/configs/services/proximity/config"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/kafka"
+	"github.com/spatiumsocialis/infra/pkg/services/proximity/handlers"
+	"github.com/spatiumsocialis/infra/pkg/services/proximity/models"
 )
 
 func main() {

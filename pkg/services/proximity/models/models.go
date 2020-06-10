@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
-	"github.com/safe-distance/socium-infra/pkg/common"
-	"github.com/safe-distance/socium-infra/pkg/common/auth"
+	"github.com/spatiumsocialis/infra/pkg/common"
+	"github.com/spatiumsocialis/infra/pkg/common/auth"
 )
 
 // Schema holds the list of models that the DB schema contains
