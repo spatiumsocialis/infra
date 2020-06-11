@@ -11,4 +11,5 @@
 | `make start`          | Start the services                 |
 | `make stop`           | Stop the services                  |
 | `make test`           | Run the tests                      |
+| `make coverage`       | Show HTML coverage report          |
 | `make dockerhost-mac` | Output the local Docker IP         |

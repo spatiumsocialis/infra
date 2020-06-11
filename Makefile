@@ -29,7 +29,7 @@ coverage:
 build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
 token:
-	./tools/tokengen/cmd/tokengen/tokengen.out -u $(uid)
+	sh ./scripts/token.sh $(uid)
 push-deps:
 	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
 push:
@@ -53,3 +53,5 @@ dockerhost:
 	sh ./scripts/dockerhost.sh
 dockerhost-mac:
 	sh ./scripts/dockerhost_mac.sh
+dockerhost-mac-set:
+	sh ./scripts/dockerhost_mac_set.sh

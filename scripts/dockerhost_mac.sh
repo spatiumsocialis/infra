@@ -1,4 +1,2 @@
-DOCKERHOST=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d: | head -n1)
-
-export DOCKERHOST=$DOCKERHOST
+source ./scripts/dockerhost_mac_set.sh
 echo ${DOCKERHOST}
