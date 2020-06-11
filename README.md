@@ -6,7 +6,7 @@
 
 ## Commands
 | Command                  | Description                        |
-|---------------------------------------------------------------|
+|--------------------------|------------------------------------|
 | `make build`             | Build the services                 |
 | `make start`             | Start the services                 |
 | `make stop`              | Stop the services                  |
