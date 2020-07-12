@@ -5,4 +5,4 @@
 # $4: Docker build context
 
 source .env
-docker build -t $1/$2/deps:latest -f $3/deps.Dockerfile $4
+docker build -t $1/$2/common:latest -f $3/common.Dockerfile $4

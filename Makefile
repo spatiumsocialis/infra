@@ -20,7 +20,7 @@ ifeq ($(env),)
 env := dev
 endif
 
-all: deps test build
+all: common test build
 test: 
 	PROJECT_ROOT=$(PWD) ${GOTEST} -coverprofile=/tmp/coverage.out ./pkg/... $(ARGS)
 .PHONY: test
@@ -30,17 +30,17 @@ build-token:
 	$(GOBUILD) -o ./tools/tokengen/cmd/tokengen/tokengen.out ./tools/tokengen/cmd/tokengen
 token:
 	sh ./scripts/token.sh $(uid)
-push-deps:
-	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/deps:latest
+push-common:
+	docker push ${GOOGLE_GCR_HOSTNAME}/${GOOGLE_PROJECT_ID}/common:latest
 push:
 	sh ./scripts/push.sh ${PWD} ${BUILD_PACKAGE_DIR} ${BUILD_DEPLOY_DIR} ${service}
 pull:
 	sh ./scripts/pull.sh ${PWD} ${BUILD_DEPLOY_DIR} ${service}
-build-deps:
-	sh ./scripts/build-deps.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
+build-common:
+	sh ./scripts/build-common.sh ${GOOGLE_GCR_HOSTNAME} ${GOOGLE_PROJECT_ID} ${BUILD_PACKAGE_DIR} ${PWD}
 start:
 	sh ./scripts/start.sh ${PWD} ${BUILD_DEPLOY_DIR} ${env} ${service}
-build: build-deps
+build: build-common
 	sh ./scripts/build.sh ${PWD} ${SERVICE_DOCKERFILE} ${BUILD_DEPLOY_DIR} ${service} 
 stop:
 	docker-compose -f ${BUILD_DEPLOY_DIR}/docker-compose.yml down ${service}
