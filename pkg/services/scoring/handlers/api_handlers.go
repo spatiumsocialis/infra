@@ -19,7 +19,7 @@ func GetCircleScoreForPeriod(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
-		user, err := auth.GetUser(r, s.DB)
+		user, err := auth.GetUser(s.DB, r)
 		if err != nil {
 			common.ThrowError(w, fmt.Errorf("error retrieving current user: %v", err), http.StatusInternalServerError)
 			return
@@ -54,7 +54,7 @@ func GetEventScoresForPeriod(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
-		user, err := auth.GetUser(r, s.DB)
+		user, err := auth.GetUser(s.DB, r)
 		if err != nil {
 			http.Error(w, "error retrieving current user: "+err.Error(), http.StatusBadRequest)
 			return

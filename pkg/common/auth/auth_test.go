@@ -11,6 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	// TestUID is the UID of a test user
+	TestUID = "UpIEj9XrQNMzdOQDgPSY0MGSsnO2"
+)
+
 func TestMain(m *testing.M) {
 	if err := common.LoadEnv(); err != nil {
 		log.Fatalln(err)

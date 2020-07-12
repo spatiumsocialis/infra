@@ -19,7 +19,7 @@ func AddToCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
-		user, err := auth.GetUser(r, s.DB)
+		user, err := auth.GetUser(s.DB, r)
 		if err != nil {
 			common.ThrowError(w, fmt.Errorf("Error retrieving current user: %v", err.Error()), http.StatusInternalServerError)
 			return
@@ -83,7 +83,7 @@ func RemoveFromCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
-		user, err := auth.GetUser(r, s.DB)
+		user, err := auth.GetUser(s.DB, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -169,7 +169,7 @@ func GetCircle(s *common.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Get the current user
-		user, err := auth.GetUser(r, s.DB)
+		user, err := auth.GetUser(s.DB, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

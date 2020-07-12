@@ -63,7 +63,7 @@ func TestAddPingHandler(t *testing.T) {
 
 	// Create a test request and add the test token to its context
 	r := httptest.NewRequest("POST", "/location", bytes.NewBuffer(payload))
-	ctx := auth.AddTokenTo(context.Background(), testToken)
+	ctx := auth.WithToken(context.Background(), testToken)
 	w := httptest.NewRecorder()
 	// Call the interaction handler with the response recorder and test request
 	mp.ExpectInputAndSucceed()
